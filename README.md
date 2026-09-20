@@ -33,7 +33,7 @@ for the full backlog.
 
 ## Start here
 
-All durable project context — charter, architecture, domain model, methodology, roadmap,
+ All durable project context — charter, architecture, domain model, methodology, roadmap,
 decisions, assumptions, risks, and current state — lives in
 [`project-memory-bank/`](project-memory-bank/). Read the relevant memory-bank files before
 reading source code or making changes. Start with
