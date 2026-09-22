@@ -30,7 +30,10 @@ free, zero-credential "smoke reproduction" that runs the real pipeline end-to-en
 against a checked-in reference, a GitHub Actions CI workflow that runs that same smoke
 reproduction on every push/PR, an offline cross-user report comparison CLI
 (`npm run report:compare`), and a GitHub Pages workflow that can publish `docs/` as a static site
-(manual opt-in — see [Continuous Integration](#continuous-integration) below).
+(manual opt-in — see [Continuous Integration](#continuous-integration) below). Also included: a
+newbie quickstart guide, two "golden example" benchmark-task deep-dives, and a 5-post blog series
+(see [Requirements and quickstart](#requirements-and-quickstart),
+[Golden examples](#golden-examples), and [Blog series](#blog-series) below).
 
 Not yet done: executing a live comparison run against a real, paid LLM backend (the mechanism is
 built and verified end-to-end — including against genuinely-executed, not just synthetic, data via
@@ -38,6 +41,39 @@ built and verified end-to-end — including against genuinely-executed, not just
 user's own API key or local model and an explicit `npm run experiment:run`). See
 [`project-memory-bank/20-next-actions.md`](project-memory-bank/20-next-actions.md) for the full
 backlog.
+
+## Requirements and quickstart
+
+- **Node.js ≥ 20**, npm. No Python, no database, no external services — dependencies are pinned via
+  the committed `package-lock.json` (install with `npm ci`, not `npm install`).
+
+```
+npm ci
+npm run build
+npm test
+npm run reproduce:smoke
+```
+
+New to the project? [`NewbieQuickStarterGuide.md`](NewbieQuickStarterGuide.md) is a full FAQ-style
+walkthrough — setup, project structure, glossary, and common questions a first-time reader has.
+
+## Golden examples
+
+Two of the three real-fixture benchmark tasks, each with a full design walkthrough — what makes the
+task a good test, what a context-free attempt is likely to get wrong, and how verification judges
+it:
+
+- [`docs/golden-examples/debugging-01.md`](docs/golden-examples/debugging-01.md) — a single-file
+  off-by-one bug, chosen for verification clarity.
+- [`docs/golden-examples/refactoring-01.md`](docs/golden-examples/refactoring-01.md) — duplicated
+  validation logic across three files with subtle inconsistencies, chosen for cross-file reasoning.
+
+## Blog series
+
+[`blogs/`](blogs/) — a 5-post series on this project's design: the motivating problem, the
+evaluation contract and deterministic verification, statistical rigor and ablation methodology, the
+two golden examples above, and the CI/reproducibility engineering. Start at
+[`blogs/README.md`](blogs/README.md).
 
 ## Continuous Integration
 

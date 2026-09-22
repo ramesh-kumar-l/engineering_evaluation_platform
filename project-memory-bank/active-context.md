@@ -53,6 +53,20 @@ invokes it (27/27 matched, passed) and `report:compare` against a fresh run comp
 unverified against a real GitHub Actions execution since nothing was pushed this round. Full detail
 in [[phases/phase-13]] and ADR-018 in [[14-decisions]].
 
+**Visibility package (this session, not a roadmap phase):** added `NewbieQuickStarterGuide.md`
+(repo root), two "golden example" deep-dives (`docs/golden-examples/debugging-01.md`,
+`refactoring-01.md`, walking through the two real-fixture tasks' design/traps/verification), a
+5-post Medium-ready blog series under `blogs/` (motivation, evaluation-contract design, statistical
+rigor/ablation, the two golden examples, CI/reproducibility engineering), and README additions
+(Requirements/quickstart, Golden examples, Blog series sections). All content is carefully scoped
+to never imply a real live-LLM comparison result exists — every reference to run/metric data is
+either the real task/fixture/verification design, the real but mechanics-only `reproduce:smoke`
+pipeline, or explicitly labeled synthetic demo data, consistent with the project's existing
+BENCHMARK.md/REPRODUCING.md framing. No `requirements.txt` was created (project is pure Node/
+TypeScript, zero Python) — the user confirmed the Node-native equivalent (Prerequisites section +
+`package-lock.json`) instead. Purely additive documentation; no source code, schema, or pipeline
+changes; nothing committed or pushed per Git Safety Protocol.
+
 **Phase 12:** `npm run reproduce:smoke` (`src/experiments/runSmokeReproduction.ts`)
 runs the *real* harness → agent → verifier → metrics → Phase 7/8 analysis → Phase 9 report → Phase
 10 dashboard pipeline end-to-end, for free, using a new `DeterministicFakeLlmClient`
