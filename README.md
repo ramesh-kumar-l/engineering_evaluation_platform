@@ -13,23 +13,31 @@ engineering tasks, capturing full traces and producing reproducible, falsifiable
 
 ## Status
 
-Phase 10 of 13 complete — see
+Phase 11 of 13 complete — see
 [`project-memory-bank/19-phase-status.md`](project-memory-bank/19-phase-status.md) for the
 per-phase ledger and [`project-memory-bank/13-roadmap.md`](project-memory-bank/13-roadmap.md) for
-the full roadmap. **299 tests passing across 78 files** (verified 2026-09-19: `npm test`).
+the full roadmap. **302 tests passing across 80 files** (verified 2026-09-22: `npm test`).
 
 Built and working: the evaluation contract and 14-entity domain model, a 30-task benchmark (3
 with real fixture code and pinned commits), an isolated experiment harness, deterministic
 verification, a 14-of-22-metric scoring engine, a hand-rolled statistics module (confidence
 intervals, effect sizes, failure clustering), a real ECC `ContextProvider` integration
 (subprocess CLI invocation, plus per-component ablation), canonical `Report`/`ReportGraph`
-persistence, and a static HTML dashboard MVP.
+persistence, a static HTML dashboard MVP, and public-facing benchmark/reproducibility
+documentation.
 
 Not yet done: executing a live comparison run against a real LLM backend (the mechanism is built
 and tested end-to-end against synthetic data; it needs the user's own API key or local model and
-an explicit `npm run experiment:run`), and Phase 11+ (public benchmark, external reproduction, CI
-integration). See [`project-memory-bank/20-next-actions.md`](project-memory-bank/20-next-actions.md)
-for the full backlog.
+an explicit `npm run experiment:run`), and Phase 12+ (external reproduction, CI integration). See
+[`project-memory-bank/20-next-actions.md`](project-memory-bank/20-next-actions.md) for the full
+backlog.
+
+## Benchmark and reproduction
+
+- [`docs/BENCHMARK.md`](docs/BENCHMARK.md) — what the benchmark measures, task categories, fixture
+  status, the 9-condition experiment design, verification/metrics methodology.
+- [`docs/REPRODUCING.md`](docs/REPRODUCING.md) — step-by-step guide to running a comparison
+  yourself, required run metadata, and current limitations.
 
 ## Start here
 
@@ -43,14 +51,14 @@ EEP/ECC boundary and module layering.
 
 ## Demo
 
-[`docs/sample-dashboard.html`](docs/sample-dashboard.html) is a real, self-contained page
-produced by EEP's own rendering pipeline (`buildReport` → `writeDashboard`, the same code path
-`npm run dashboard:generate` runs) — download it and open it in a browser. **The two runs it
+[`docs/sample-dashboard.html`](docs/sample-dashboard.html) is a real, self-contained page produced
+by `npm run demo:generate` (`buildReport` → `renderDashboardPage`, the same code path
+`dashboard:generate` runs, against two literal synthetic runs in
+`src/experiments/demoRunRecords.ts`) — download it and open it in a browser. **The two runs it
 shows are synthetic fixture data, not a real evaluation**, and the page says so in its own
 "Limitations" section; this demonstrates the dashboard renderer, not a benchmark result. To
-generate a real one from an actual comparison run: `npm run experiment:run` (needs your own LLM
-credentials — see [`project-memory-bank/20-next-actions.md`](project-memory-bank/20-next-actions.md)),
-then `npm run report:generate` and `npm run dashboard:generate`.
+generate a real one from an actual comparison run, see [`docs/REPRODUCING.md`](docs/REPRODUCING.md):
+`npm run experiment:run`, then `npm run report:generate` and `npm run dashboard:generate`.
 
 ## Relationship to ECC
 

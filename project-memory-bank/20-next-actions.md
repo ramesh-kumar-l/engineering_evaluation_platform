@@ -1,11 +1,12 @@
 # 20 — Next Actions
 
 1. **Immediate:** await explicit user approval to proceed with executing a live comparison run
-   (item 2 below), Phase 11, the remaining Phase 9 roadmap scope (item 2c below), or richer
-   Phase 10 dashboard views (item 2d below). Phase 7's roadmap scope (including failure analysis,
-   item 2a below), Phase 8's orchestration follow-up (item 2b below), Phase 9's canonical
-   Report/persistence format (item 2c below), and Phase 10's dashboard MVP (item 2d below) are now
-   all fully implemented.
+   (item 2 below), Phase 12 (External Reproduction), the remaining Phase 9 roadmap scope (item 2c
+   below), or richer Phase 10 dashboard views (item 2d below). Phase 7's roadmap scope (including
+   failure analysis, item 2a below), Phase 8's orchestration follow-up (item 2b below), Phase 9's
+   canonical Report/persistence format (item 2c below), Phase 10's dashboard MVP (item 2d below),
+   and Phase 11's benchmark documentation/reproducibility guide/regenerable demo (item 2e below)
+   are now all fully implemented.
 2. **Phase 6 remainder — now implemented, live execution still open:**
    - `LlmSolvingAgent` (`src/harness/agents/llmSolvingAgent.ts`) is the real, LLM-backed solving
      agent, supporting Claude, ChatGPT, Gemini, or a local model via `src/harness/llm/` (ADR-013
@@ -74,6 +75,18 @@
    output folded into `ReportGraph` first (same gap item 2c above already flags). Also not done:
    any client-side interactivity, and human-readable Task/Condition names (the dashboard shows raw
    `taskId`/`conditionId` since `ReportGraph` doesn't carry `Task`/`Condition` entities).
+2e. **Phase 11 — now implemented:** `docs/BENCHMARK.md` and `docs/REPRODUCING.md` are new
+   public-facing documentation (distinct from this internal `project-memory-bank/`), covering the
+   benchmark's design, fixture status, 9-condition experiment design, verification/metrics
+   methodology, the scientific-integrity commitment, and a full reproduction walkthrough. The one
+   existing public "result" artifact, `docs/sample-dashboard.html`, was previously hand-copied into
+   git; it is now produced by `npm run demo:generate`
+   (`src/experiments/demoRunRecords.ts` + `generateDemoDashboard.ts`, reusing `buildReport()`/
+   `renderDashboardPage()` unchanged) so it is reproducible rather than a one-off manual step. See
+   ADR-016 in [[14-decisions]] and [[phases/phase-11]]. **Not yet done, by design:** publishing a
+   *real* result (still gated on a live comparison run being executed and approved), any GitHub
+   Pages/CI hosting automation (Phase 13's territory), and fixing the `modelName`/`modelVersion` gap
+   (item 2 above) — `REPRODUCING.md` documents it as an open limitation, it does not resolve it.
 3. **Fixture backlog (not phase-blocking, pick up incrementally):** 27 of the 30 tasks still use
    the `"unpinned"` sentinel — only `debugging-01`, `feature-01`, `refactoring-01` have real
    fixture source code, a real `commitSha`, and real verification coverage. Author the rest the
@@ -150,6 +163,14 @@
    pattern can accidentally match a same-named `src/` subdirectory, as happened with `dashboard/`
    matching `src/dashboard/` when first added (caught before commit).
 
-Do not execute a live comparison run before approval is given (master prompt §40). Phase 11
-(Public Benchmark), the remaining Phase 9 roadmap scope (item 2c above), and richer Phase 10
+12. **Public-docs convention note (ADR-016):** `docs/BENCHMARK.md` and `docs/REPRODUCING.md` are
+   written for an external reader and must stay self-contained — paraphrase `project-memory-bank/`
+   content into them rather than linking a public doc into this internal, AI/dev-facing memory
+   bank. There is no separate "publish" script: a generated `dashboard/<experimentId>/index.html`
+   file is itself the publishable artifact (copy it anywhere). If the benchmark's metric list,
+   ablation components, or condition design change, update `docs/BENCHMARK.md` in the same change
+   — it has no automated freshness check against its `project-memory-bank/` sources.
+
+Do not execute a live comparison run before approval is given (master prompt §40). Phase 12
+(External Reproduction), the remaining Phase 9 roadmap scope (item 2c above), and richer Phase 10
 dashboard views (item 2d above) also await explicit approval before implementation starts.

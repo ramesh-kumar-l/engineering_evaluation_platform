@@ -13,7 +13,7 @@
 | 8 — Ablation | Complete (per-component measurement of ECC's contribution), pending user approval to proceed |
 | 9 — Reporting | Complete (canonical `Report`/`ReportGraph` persistence with full Runs→Metrics→Evidence traceability — this round's scope); CSV/Markdown/HTML formats remain roadmap backlog |
 | 10 — Dashboard Feasibility / MVP | Complete (feasibility spike + static, single-experiment MVP dashboard reading Phase 9's `ReportGraph` — this round's scope); richer views (comparison, failure analysis) await Phase 7/8 output folded into `Report` |
-| 11 — Public Benchmark | Not started |
+| 11 — Public Benchmark | Complete (benchmark documentation, reproducibility guide, and a regenerable public sample dashboard — this round's scope); a real published result still awaits an approved live comparison run |
 | 12 — External Reproduction | Not started |
 | 13 — CI / GitHub Integration | Not started |
 
@@ -61,3 +61,13 @@ comparison, complexity/category breakdowns, and failure-cluster views from
 [[12-dashboard-strategy]]'s full target list remain future work — they need Phase 7/8's analysis
 output folded into `ReportGraph` first, a gap already flagged in [[phases/phase-09]]. Like Phase
 7/8/9, validated only against synthetic fixtures; no live run has been executed yet.
+
+Phase 11's exit criterion this round was benchmark documentation, a reproducibility guide, and
+public results ([[13-roadmap]]). Since no live comparison run has ever been executed, "public
+results" this round means making the one existing public-facing artifact,
+`docs/sample-dashboard.html`, reproducible via a new `npm run demo:generate` script
+(`src/experiments/demoRunRecords.ts`/`generateDemoDashboard.ts`, reusing `buildReport()`/
+`renderDashboardPage()` unchanged) instead of hand-copied, plus new `docs/BENCHMARK.md` (benchmark
+design) and `docs/REPRODUCING.md` (reproduction guide) — both public-facing, distinct from this
+internal memory bank (ADR-016). A real published result still requires an approved live comparison
+run, unchanged from Phase 6/7/8/9/10's status.

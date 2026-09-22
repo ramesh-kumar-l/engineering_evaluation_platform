@@ -5,17 +5,39 @@ source code, if picking this project back up after a break.
 
 ## Where things stand right now
 
-Phase 0 (Foundation) through Phase 10 (Dashboard Feasibility/MVP) are complete. Phase 6's full
-roadmap scope (real solving agent + actual comparison-run mechanism) is closed — see below. Phase
-7 is complete against its *entire* roadmap row, including failure clustering — not just the
+Phase 0 (Foundation) through Phase 11 (Public Benchmark) are complete. Phase 6's full roadmap
+scope (real solving agent + actual comparison-run mechanism) is closed — see below. Phase 7 is
+complete against its *entire* roadmap row, including failure clustering — not just the
 confidence-intervals-and-effect-size scope from the round that first implemented it. Phase 8
 (Ablation) is implemented and verified, scoped to per-component measurement of ECC's contribution.
 Phase 9 (Reporting) is implemented and verified, scoped to the canonical `Report`/`ReportGraph`
 persistence format with full Runs→Metrics→Evidence traceability — CSV/Markdown/HTML export remain
 roadmap backlog. Phase 10 (Dashboard) is implemented and verified, scoped to a feasibility spike
-plus a static, single-experiment MVP dashboard reading Phase 9's `ReportGraph` format (see below).
+plus a static, single-experiment MVP dashboard reading Phase 9's `ReportGraph` format. Phase 11
+(Public Benchmark) is implemented and verified, scoped to public-facing benchmark documentation, a
+reproducibility guide, and a regenerable synthetic public sample — a real published result still
+awaits an approved live comparison run (see below).
 
-**Phase 10 (this session):** `src/dashboard/` (new, pure — depends only on `src/domain/` and
+**Phase 11 (this session):** New public-facing documentation under `docs/` (distinct from this
+internal `project-memory-bank/`, per ADR-016): `docs/BENCHMARK.md` (task categories, fixture
+status, the 9-condition experiment design, verification/metrics methodology, the
+scientific-integrity commitment) and `docs/REPRODUCING.md` (prerequisites, LLM provider env vars
+with an explicit privacy/cost caveat, the exact `experiment:run` → `experiment:analyze` →
+`report:generate` → `dashboard:generate` pipeline, required run metadata and versioning axes from
+[[10-reproducibility]], the immutability policy, and a numbered current-limitations list). Both
+docs state plainly, in their opening paragraph, that no live comparison run has been executed yet —
+avoiding the risk of "Public Benchmark" being misread as a real finding. The one existing
+public-facing result artifact, `docs/sample-dashboard.html`, was previously a hand-copied file (no
+script produced it); it is now a build output of new `npm run demo:generate`
+(`src/experiments/demoRunRecords.ts` — two literal, explicitly-commented synthetic
+`EvaluatedRunRecord`s — plus `generateDemoDashboard.ts`, which pipes them through `buildReport()`
+and `renderDashboardPage()` completely unchanged). Regenerating it was diffed against the
+previously-committed file: identical apart from the randomly-generated report/evaluation ids.
+Deliberately not built: a new "publish" pipeline (the dashboard's existing self-contained HTML file
+already is the publishable artifact — copy it anywhere) and any GitHub Pages/CI hosting automation
+(Phase 13's territory). Full detail in [[phases/phase-11]] and ADR-016 in [[14-decisions]].
+
+**Phase 10:** `src/dashboard/` (new, pure — depends only on `src/domain/` and
 `src/reporting/`, the same one-way-dependency discipline ADR-011/ADR-014 established) renders one
 experiment's `ReportGraph` into a single, self-contained, offline-readable HTML page: an overview
 panel (`renderOverview.ts` — title, experiment id, generated timestamp, required `limitations`,
@@ -128,6 +150,13 @@ deliberately unimplemented (ADR-009). Full detail in [[phases/phase-05]].
 
 ## What is NOT done
 
+**A real published benchmark result does not exist yet.** Phase 11's `docs/BENCHMARK.md`/
+`docs/REPRODUCING.md` document the benchmark's design and how to reproduce it, and
+`docs/sample-dashboard.html` is an explicitly-labeled synthetic demo, regenerable via
+`npm run demo:generate` — none of this is a real finding. That still requires an approved live
+comparison run (see below) followed by the existing `report:generate`/`dashboard:generate`
+pipeline. No GitHub Pages/CI publishing automation exists (Phase 13's territory).
+
 **Richer dashboard views don't exist yet.** `src/dashboard/` (Phase 10) renders only a single
 experiment's `ReportGraph` — [[12-dashboard-strategy]]'s full target view list (multi-experiment/
 condition comparison, complexity/category breakdowns, failure-cluster views) needs Phase 7/8's
@@ -165,15 +194,15 @@ assume any of these exist without checking `implementation-status.md` first.
 
 ## Immediate next step
 
-Per the master prompt's strict phase gate, this Phase 10 work's completion is reported to the user
-and no further Phase 11 work or live run has started. Do not begin further work, and do not
+Per the master prompt's strict phase gate, this Phase 11 work's completion is reported to the user
+and no further Phase 12 work or live run has started. Do not begin further work, and do not
 execute a live comparison run, without an explicit new approval message from the user, even if
 this file is being read in a fresh session — see [[20-next-actions]] and [[00-project-charter]]
-§Working protocol. Phases 6, 7, 8, 9, and 10 are now all fully complete against this round's
+§Working protocol. Phases 6, 7, 8, 9, 10, and 11 are now all fully complete against this round's
 scope; the next open items are: executing a live comparison run (needs the user's own LLM
-credentials and an explicit go-ahead), Phase 11 (Public Benchmark), the remaining Phase 9 roadmap
-scope (CSV/Markdown/HTML export), or richer Phase 10 dashboard views (multi-experiment comparison,
-failure analysis — needs Phase 7/8 output folded into `Report` first).
+credentials and an explicit go-ahead), Phase 12 (External Reproduction), the remaining Phase 9
+roadmap scope (CSV/Markdown/HTML export), or richer Phase 10 dashboard views (multi-experiment
+comparison, failure analysis — needs Phase 7/8 output folded into `Report` first).
 
 ## Process reminders for whoever (human or agent) picks this up
 
@@ -247,3 +276,10 @@ failure analysis — needs Phase 7/8 output folded into `Report` first).
   server without a concrete need (ADR-004/ADR-009 discipline). Any new gitignored output directory
   under the repo root must be anchored with a leading `/` in `.gitignore` (an unanchored pattern
   can accidentally match a same-named `src/` subdirectory, as happened here).
+- Public-docs convention (ADR-016): `docs/BENCHMARK.md`/`docs/REPRODUCING.md` are written for an
+  external reader — paraphrase `project-memory-bank/` content into them, never link a public doc
+  into this internal memory bank. There is no separate "publish" pipeline: a generated
+  `dashboard/<experimentId>/index.html` file is already the publishable artifact. If the benchmark
+  design (task categories, ablation components, condition list) changes, update
+  `docs/BENCHMARK.md` in the same change — it has no automated freshness check against its
+  `project-memory-bank/` sources.

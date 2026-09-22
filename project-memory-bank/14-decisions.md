@@ -730,3 +730,63 @@ Format: Decision / Context / Options / Chosen approach / Reason / Trade-offs / C
   new/edited test files (299 total). Like Phase 7/8/9 before it, not yet exercised against a real
   live comparison run's data — validated against synthetic `ReportGraph` fixtures in tests.
 - **Status:** Accepted.
+
+## ADR-016: Public-facing docs live in `docs/`, not `project-memory-bank/`; publishing a result reuses the existing dashboard file — no new publish pipeline
+
+- **Context:** Phase 11's exit criterion is "Benchmark documentation, reproducibility, public
+  results" ([[13-roadmap]]). No live comparison run has ever been executed, so "public results"
+  this round cannot mean publishing a real finding — the only existing public-facing result
+  artifact is `docs/sample-dashboard.html`, which was hand-copied into git after manually running
+  the real `buildReport` → `writeDashboard` pipeline against typed-in synthetic data (no script
+  regenerates it). Phase 12 ("External Reproduction") is the later, separate phase for onboarding
+  actual external users — this phase is EEP producing its own documentation/artifacts first.
+- **Options considered (where public docs live):** (a) write the benchmark design doc and
+  reproduction guide into `project-memory-bank/`, alongside the existing internal reference docs
+  ([[07-benchmark-strategy]], [[10-reproducibility]]); (b) new files under `docs/`, written for an
+  external reader, distinct from `project-memory-bank/`'s internal AI/dev-facing compressed
+  save-state.
+- **Chosen approach:** (b). New `docs/BENCHMARK.md` and `docs/REPRODUCING.md` synthesize and
+  paraphrase the relevant `project-memory-bank/` content (07/08/09/10-*.md, the charter's
+  scientific-integrity rule) for an external reader, rather than linking into
+  `project-memory-bank/` from public-facing prose.
+- **Reason:** `project-memory-bank/` is explicitly this project's internal "compressed save state"
+  for future AI sessions (per this round's own user instruction and every prior phase's
+  convention) — its files assume that context, cross-reference each other densely by `[[wikilink]]`,
+  and are not meant to be a stable public reading surface. A reader arriving at the repository from
+  outside needs a self-contained explanation, not internal state.
+- **Options considered (how a result gets "published"):** (a) build a new `publish`/`export`
+  orchestration script (e.g. `src/experiments/publishBenchmarkResults.ts`) that bundles a report
+  and dashboard into some new output location; (b) treat the dashboard's existing self-contained
+  HTML file (`dashboard/<experimentId>/index.html`, from `dashboard:generate`, ADR-015) as already
+  being the publishable artifact — copying it anywhere is "publishing" — and add no new pipeline.
+- **Chosen approach:** (b). `docs/REPRODUCING.md` documents this explicitly: the dashboard file has
+  no external resource references, so it can be shared as-is (a gist, a GitHub Pages branch, a
+  release attachment) with zero new code.
+- **Reason:** Option (a) would duplicate `generateDashboard.ts`'s read-report → render → write
+  sequence almost entirely, with no decoupling justification (unlike the `resultsWriter.ts`/
+  `reportWriter.ts` precedent, which had a real cross-layer reason for its small duplication) —
+  pure duplication for no benefit, against this project's "extract don't duplicate" discipline. It
+  would also add hosting/deployment concerns ([[04-architecture]]'s "no cloud infra until a real
+  requirement demonstrates the need") that belong to Phase 13 (CI/GitHub Integration), not here.
+- **The one real gap closed this round:** the *existing* demo artifact was not reproducible — it
+  was hand-copied, not scripted. New `src/experiments/demoRunRecords.ts` (two literal, schema-valid
+  `EvaluatedRunRecord` values, explicitly commented as synthetic-only) and
+  `src/experiments/generateDemoDashboard.ts` (`demoRunRecords()` → `buildReport()` →
+  `renderDashboardPage()` → write, all three reused completely unchanged from Phases 9/10) replace
+  the manual step with `npm run demo:generate`. Running it reproduces `docs/sample-dashboard.html`
+  near-identically — only the randomly-generated report/evaluation ids differ between runs, which
+  is expected and harmless (they are never used as stable references).
+- **Trade-offs:** This round still does not produce or publish a real benchmark result — that
+  remains gated on a live comparison run, unchanged. `docs/BENCHMARK.md`/`docs/REPRODUCING.md` are
+  plain Markdown with no automated freshness check against `project-memory-bank/`'s source content
+  — a future change to, e.g., the metric list or ablation components could drift out of sync with
+  these public docs if not updated alongside. Not fixed this round: `Run.metadata.modelName`/
+  `modelVersion` (open risk-register row) — `docs/REPRODUCING.md` now surfaces this gap to a wider
+  audience but does not resolve it; phrased there as an open limitation, not a closure.
+- **Consequences:** New `src/experiments/demoRunRecords.ts` (102 lines) and
+  `src/experiments/generateDemoDashboard.ts` (43 lines), plus 2 new test files (3 new tests, 302
+  total across 80 files). New `npm run demo:generate` script. New `docs/BENCHMARK.md` and
+  `docs/REPRODUCING.md`. `docs/sample-dashboard.html` regenerated via the new script (content
+  unchanged apart from random ids). `README.md` updated to link both new docs and describe the
+  demo as a script output. No existing schema, dashboard, or reporting code changed.
+- **Status:** Accepted.
