@@ -17,7 +17,8 @@
     "experiment:analyze": "npm run build && node dist/experiments/analyzeComparisonResults.js",
     "report:generate": "npm run build && node dist/experiments/generateReport.js",
     "dashboard:generate": "npm run build && node dist/experiments/generateDashboard.js",
-    "demo:generate": "npm run build && node dist/experiments/generateDemoDashboard.js"
+    "demo:generate": "npm run build && node dist/experiments/generateDemoDashboard.js",
+    "reproduce:smoke": "npm run build && node dist/experiments/runSmokeReproduction.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",

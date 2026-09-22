@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { AnthropicLlmClient } from './anthropicLlmClient.js';
 import { createLlmClient } from './createLlmClient.js';
+import { DeterministicFakeLlmClient } from './deterministicFakeLlmClient.js';
 import { OpenAiCompatibleLlmClient } from './openAiCompatibleLlmClient.js';
 
 describe('createLlmClient', () => {
@@ -18,5 +19,16 @@ describe('createLlmClient', () => {
     });
     expect(client).toBeInstanceOf(OpenAiCompatibleLlmClient);
     expect(client.providerLabel).toContain('localhost:11434');
+  });
+
+  it('builds a DeterministicFakeLlmClient for provider "fake-deterministic"', () => {
+    const client = createLlmClient({ provider: 'fake-deterministic' });
+    expect(client).toBeInstanceOf(DeterministicFakeLlmClient);
+    expect(client.providerLabel).toBe('fake-deterministic');
+  });
+
+  it('passes an explicit model through to DeterministicFakeLlmClient', () => {
+    const client = createLlmClient({ provider: 'fake-deterministic', model: 'custom' });
+    expect(client.model).toBe('custom');
   });
 });

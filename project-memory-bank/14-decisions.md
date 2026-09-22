@@ -790,3 +790,91 @@ Format: Decision / Context / Options / Chosen approach / Reason / Trade-offs / C
   unchanged apart from random ids). `README.md` updated to link both new docs and describe the
   demo as a script output. No existing schema, dashboard, or reporting code changed.
 - **Status:** Accepted.
+
+## ADR-017: Zero-cost "smoke reproduction" via a deterministic fake LLM provider; comparison keyed by raw-bundle `(taskId, conditionName)`, never `report.json`'s `conditionId`; `time-to-correct-outcome` excluded; reference is a checked-in, never-auto-regenerated file
+
+- **Context:** Phase 12's exit criterion is "External users, independent runs, comparison"
+  ([[13-roadmap]]). No live comparison run against a real, paid LLM has ever been executed, so "an
+  external user independently reproduces a result" cannot mean reproducing a real ECC-vs-native
+  finding this round — same constraint every phase since 6 has carried. The concrete, honest
+  interpretation adopted: let an external user run the *real* harness/agent/verifier/metrics/
+  analysis/report/dashboard pipeline end-to-end, for free, with no credentials, and *verify* their
+  run against a checked-in reference — proving the mechanism reproduces identically across
+  machines, not that any context provider helps.
+- **Options considered (how to fake the LLM without faking the pipeline):** (a) hand-author
+  `EvaluatedRunRecord` fixtures again, as Phase 11's demo did; (b) add a real `LlmClient`
+  implementation (`DeterministicFakeLlmClient`, `src/harness/llm/`) that plugs into the existing,
+  unmodified `LlmSolvingAgent`/`runComparisonExperiment.ts` orchestration, so every layer below the
+  network call runs for real (real file I/O, real `npm test` subprocess execution via the same
+  `runNpmTest` the test-suite verifier uses, real verifier/metric/analysis/report/dashboard code).
+- **Chosen approach:** (b). `DeterministicFakeLlmClient` is a pure function of
+  `request.messages` — no network, no mutable state — so it is safe to reuse across every run in a
+  sequential comparison loop: it calls `list_files` once, then concludes with no further tool
+  calls. It never reads task-specific content or edits any file, so it can never be tuned, even by
+  accident, to make one condition look better than another — the scientific-integrity rule from
+  [[00-project-charter]] is satisfied by construction, not by disclaimer alone. Wired in as a third
+  `LlmProviderConfig` variant (`'fake-deterministic'`), special-cased in
+  `llmProviderConfigFromEnv.ts` to need zero environment variables.
+- **Critical correctness finding — comparison must key off raw bundles, not `report.json`:**
+  `experimentConditions.ts`'s `buildCondition()` mints a fresh random `Condition.id` on *every*
+  call to `buildExperimentConditions()` — so `Run.conditionId` can never be a stable join key
+  across two independently-generated runs of the pipeline. `condition.name` (`'native'`, `'ecc'`,
+  `ablatedConditionName(component)` for each of the 7 fixed `ECC_ABLATION_COMPONENTS`) *is* stable
+  and survives into the raw `RunResultBundle` dump (`resultsWriter.ts`), but is dropped when
+  `generateReport.ts` adapts a bundle into an `EvaluatedRunRecord` for `buildReport()`. Consequence:
+  the new `src/experiments/reproductionReference.ts`/`compareRunResults.ts` key strictly by
+  `(taskId, conditionName)` from the raw `experiment-results-smoke/**.json` bundles
+  (`readAllRunResults()`, already exported), never from `report.json`.
+- **Critical correctness finding — `time-to-correct-outcome` must be excluded:** it is the one
+  metric built from `Date.now()`-derived wall-clock timestamps ([[08-metrics]]); it will never
+  match between two runs, even seconds apart on the same machine. `reproductionReference.ts`'s
+  `extractReferenceEntries()` drops it from every entry's `metrics`. Every other primary/secondary
+  metric is a pure function of deterministic inputs (outcome status, verification counts, trace
+  actions the deterministic client fully controls, token-estimate over deterministic content) and
+  was confirmed, by actually running `npm run reproduce:smoke` three independent times on this
+  machine, to reproduce exactly.
+- **Native-vs-ECC comparison scoping:** `runHarness.ts`'s `executeRun()` catches any
+  `ContextProvider` failure (e.g. `EccInvocationError` when no local `ecc` CLI is reachable) inside
+  a generic `try/catch` and records `AGENT_FAILURE` — it never throws and crashes the loop. This
+  means all 9 conditions can run unmodified in the smoke path with no special-casing: for a reader
+  with no local ECC checkout (the common case), all 9 conditions are actually fully deterministic;
+  for a reader who *does* have a working `ecc` CLI, the 8 ECC-based conditions will legitimately
+  diverge from a reference generated without one. `compareRunResults.ts`'s
+  `compareReferenceEntries()` treats a `'native'`-condition mismatch as always hard, and downgrades
+  an ECC-based condition's mismatch to informational only when a quick, best-effort probe
+  (`eccAvailabilityCheck.ts`'s `isEccCliAvailable()`, the same command-resolution convention as
+  `ProcessEccCliInvoker`) detects a local `ecc` CLI. An entry present in the reference but entirely
+  missing from a run's output is always hard, regardless of condition.
+- **Reference artifact policy:** `docs/reproduction-reference/smoke-reference.json` is generated
+  once, manually, during implementation (`extractReferenceEntries()` over a real
+  `npm run reproduce:smoke` run's bundles) and committed as-is — the same "run it for real, commit
+  the faithful output" discipline as ADR-016's `docs/sample-dashboard.html`. `runSmokeReproduction.ts`
+  throws a plain, actionable error if the reference is missing rather than silently regenerating
+  it from the reader's own run — auto-regenerating the very reference a user's run is supposed to
+  be checked against would defeat the comparison's purpose and is exactly the kind of
+  self-serving convenience [[00-project-charter]]'s integrity rule rules out. `writeReferenceEntries()`
+  exists only for that one manual step; nothing in the shipped orchestration path calls it.
+- **`process.env` never mutated by an importable function:** `runComparisonExperiment.ts` gained an
+  optional `llmProviderConfig?: LlmProviderConfig` field on `RunComparisonExperimentOptions` (used
+  in place of `llmProviderConfigFromEnv()` when supplied; defaults to today's env-resolved behavior
+  otherwise — no change for existing callers). `runSmokeReproduction()` passes
+  `{provider: 'fake-deterministic'}` explicitly through this seam, so it never reads or mutates
+  `EEP_LLM_*` environment variables at all, and can never accidentally reach a real paid backend
+  regardless of what the caller's shell already has configured.
+- **Trade-offs:** The smoke path proves pipeline *mechanics*, not ECC's (or any provider's)
+  quality — this must stay clearly labeled, including in the dashboard/report `limitations` field
+  it generates, so it is never mistaken for a real finding. `docs/reproduction-reference/
+  smoke-reference.json` has no automated check that it stays in sync if a fixture's own test suite
+  or the metrics/verifier set changes — a future edit to `benchmark/fixtures/{debugging,feature,
+  refactoring}-01/` or the metric/verifier set must regenerate and re-commit the reference in the
+  same change, or `reproduce:smoke` will start failing for reasons unrelated to this ADR.
+- **Consequences:** New `src/harness/llm/deterministicFakeLlmClient.ts` (40 lines),
+  `src/experiments/eccAvailabilityCheck.ts` (22 lines), `reproductionReference.ts` (73 lines),
+  `compareRunResults.ts` (111 lines), `runSmokeReproduction.ts` (117 lines), plus 5 new/extended
+  test files. New `npm run reproduce:smoke` script; new gitignored `/experiment-results-smoke/`,
+  `/reports-smoke/`, `/dashboard-smoke/` directories. New checked-in
+  `docs/reproduction-reference/smoke-reference.json` (27 entries: 3 real-fixture tasks × 9
+  conditions). `docs/REPRODUCING.md`/`docs/BENCHMARK.md` updated to document and link the new Step
+  0. No existing schema, harness, verifier, or metrics logic changed; `runComparisonExperiment.ts`'s
+  only change is the additive `llmProviderConfig` option.
+- **Status:** Accepted.

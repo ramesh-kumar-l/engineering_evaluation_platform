@@ -12,6 +12,43 @@ before you start.
   ablation conditions to run against a real ECC CLI (`ECC_CLI_COMMAND` env var points EEP at it;
   see `src/harness/providers/eccCliInvoker.ts`)
 
+## Step 0: free smoke reproduction (start here)
+
+Before spending any real money on a live comparison run, verify the pipeline itself reproduces
+correctly on your machine — for free, with no LLM credentials at all:
+
+```
+npm run reproduce:smoke
+```
+
+This runs the real harness, agent, verifiers, metrics, Phase 7/8 analysis, Phase 9 report, and
+Phase 10 dashboard end-to-end against the 3 real-fixture tasks and all 9 conditions, but with a
+deterministic fake LLM client (`DeterministicFakeLlmClient`) instead of a paid backend — it never
+attempts to solve a task (it lists files, then stops), so the result is not a performance
+benchmark. It exists to prove the pipeline mechanics reproduce identically across machines, not
+that any context provider helps. Output goes to `experiment-results-smoke/`, `reports-smoke/`, and
+`dashboard-smoke/` (all gitignored, parallel to the real pipeline's directories) and the command
+finishes by comparing your run against a reference checked into
+`docs/reproduction-reference/smoke-reference.json`, printing `Reproduction PASSED.` or
+`Reproduction FAILED.` and exiting non-zero on failure.
+
+### Verifying your reproduction
+
+The comparison distinguishes two cases:
+
+- **The `native` condition** has no external dependency at all, so it must match the checked-in
+  reference exactly on every machine — a mismatch here is a real problem (a bug, or an environment
+  difference in how the fixture's own tests run), not something to shrug off.
+- **The 8 ECC-based conditions** (`ecc` and its 7 per-component ablations) depend on a real `ecc`
+  CLI being reachable (`ECC_CLI_COMMAND` env var, else `ecc` on `PATH` — see
+  [ECC integration](../README.md#relationship-to-ecc)). The checked-in reference was generated
+  *without* a local ECC checkout available, so those 8 conditions show a deterministic
+  `AGENT_FAILURE` (the context provider couldn't be reached) in the reference. If you *do* have a
+  working local ECC CLI, your run's ECC-based conditions will legitimately differ from the
+  reference — `reproduce:smoke` detects this (the same `ECC_CLI_COMMAND`/`ecc` probe) and reports
+  those differences as informational only, not a failure. Only a `native`-condition mismatch, or a
+  run missing entirely, fails the command.
+
 ## LLM provider configuration
 
 The comparison run needs an LLM backend for its solving agent. Configure it entirely through
@@ -89,9 +126,13 @@ traceable.
 1. **Only 3 of the 30 benchmark tasks have real, runnable fixtures** (`debugging-01`,
    `feature-01`, `refactoring-01`). The other 27 have task definitions but no fixture source code
    yet, so a comparison run today only exercises those 3.
-2. **No live comparison run has been executed by this project's maintainer as of this writing.**
-   Every artifact currently in this repository is either an automated-test fixture or the
-   explicitly-labeled synthetic demo at `docs/sample-dashboard.html` — not a real benchmark result.
+2. **No live comparison run against a real, paid LLM has been executed by this project's
+   maintainer as of this writing.** The free `npm run reproduce:smoke` path (Step 0 above) verifies
+   the pipeline mechanics — real harness, verifiers, metrics, and reporting, genuinely executed —
+   but with a deterministic fake agent that never attempts to solve a task. Combined with the
+   explicitly-labeled synthetic demo at `docs/sample-dashboard.html`, every result artifact
+   currently in this repository is a test fixture, a mechanism-verification run, or a labeled
+   demo — none is a real benchmark finding.
 3. **`Run.metadata.modelName`/`modelVersion` are not yet populated** for LLM-backed runs — this is
    a known, currently open gap (tracked in this project's internal risk register), not something
    this guide's publication has resolved. As a partial stopgap, the agent name recorded on a run

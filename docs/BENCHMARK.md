@@ -56,7 +56,7 @@ agent, same model, same task, same repository state, same evaluator version):
 | Condition | Context source |
 |---|---|
 | `native` | No curated context — task text plus a plain file listing only |
-| `ecc-full` | ECC's full compiled context package |
+| `ecc` | ECC's full compiled context package |
 | `ecc-ablated:history` | ECC's context with the `history` field neutralized |
 | `ecc-ablated:memory` | ECC's context with memory-sourced evidence removed |
 | `ecc-ablated:ranking` | ECC's context with relevance ranking replaced by a neutral order |
@@ -113,6 +113,10 @@ with no shared code — EEP never modifies ECC's source or behavior to influence
 
 ## Current status
 
-No live comparison run has been executed. The mechanism above is fully implemented and tested
-against synthetic fixtures, but running it for real requires a maintainer or reproducer's own LLM
-credentials — see [REPRODUCING.md](REPRODUCING.md).
+No live comparison run against a real, paid LLM has been executed. The mechanism above is fully
+implemented and tested against synthetic fixtures, and has also been verified end-to-end against
+the real harness/verifier/metrics/reporting pipeline via a free, deterministic "smoke reproduction"
+(`npm run reproduce:smoke` — see [REPRODUCING.md](REPRODUCING.md#step-0-free-smoke-reproduction-start-here)),
+which proves the pipeline mechanics reproduce identically across machines without spending any
+money. Running the mechanism for real, with an LLM actually attempting each task, requires a
+maintainer or reproducer's own LLM credentials — see [REPRODUCING.md](REPRODUCING.md).

@@ -59,6 +59,11 @@ describe('llmProviderConfigFromEnv', () => {
     ).toThrow(MissingLlmConfigError);
   });
 
+  it('builds a fake-deterministic config with no other env vars required', () => {
+    const config = llmProviderConfigFromEnv({ EEP_LLM_PROVIDER: 'fake-deterministic' });
+    expect(config).toEqual({ provider: 'fake-deterministic' });
+  });
+
   it('parses EEP_LLM_MAX_TOKENS as an integer', () => {
     const config = llmProviderConfigFromEnv({
       EEP_LLM_PROVIDER: 'anthropic',

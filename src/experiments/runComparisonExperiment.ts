@@ -5,7 +5,7 @@ import type { ExperimentId } from '../domain/common/ids.js';
 import type { Task } from '../domain/task/task.schema.js';
 import { executeEvaluatedRun } from '../evaluation/evaluateRun.js';
 import { LlmSolvingAgent } from '../harness/agents/llmSolvingAgent.js';
-import { createLlmClient } from '../harness/llm/createLlmClient.js';
+import { createLlmClient, type LlmProviderConfig } from '../harness/llm/createLlmClient.js';
 import { computeRunMetrics } from '../metrics/computeMetrics.js';
 import { buildExperimentConditions, type ExperimentConditionEntry } from './experimentConditions.js';
 import { agentBudgetConfigFromEnv, llmProviderConfigFromEnv } from './llmProviderConfigFromEnv.js';
@@ -24,6 +24,13 @@ export interface RunComparisonExperimentOptions {
   readonly repetitions?: number;
   readonly resultsDir?: string;
   readonly environment?: string;
+  /**
+   * Explicit LLM backend config, bypassing `llmProviderConfigFromEnv()`. Used by Phase 12's smoke
+   * reproduction (`runSmokeReproduction.ts`) to force the free `fake-deterministic` provider
+   * without mutating `process.env` — see ADR-017 in project-memory-bank/14-decisions.md. Omit for
+   * the existing, unchanged behavior (resolve from `EEP_LLM_*` environment variables).
+   */
+  readonly llmProviderConfig?: LlmProviderConfig;
 }
 
 export interface RunComparisonExperimentResult {
@@ -55,7 +62,7 @@ export async function runComparisonExperiment(
     throw new Error(`Task(s) not found in benchmark/tasks: ${missing.join(', ')}`);
   }
 
-  const client = createLlmClient(llmProviderConfigFromEnv());
+  const client = createLlmClient(options.llmProviderConfig ?? llmProviderConfigFromEnv());
   const agent = new LlmSolvingAgent({ client, ...agentBudgetConfigFromEnv() });
   const conditions = buildExperimentConditions();
   const experimentId = generateId<'ExperimentId'>('experiment');

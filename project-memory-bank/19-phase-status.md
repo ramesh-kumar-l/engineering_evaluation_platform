@@ -14,7 +14,7 @@
 | 9 — Reporting | Complete (canonical `Report`/`ReportGraph` persistence with full Runs→Metrics→Evidence traceability — this round's scope); CSV/Markdown/HTML formats remain roadmap backlog |
 | 10 — Dashboard Feasibility / MVP | Complete (feasibility spike + static, single-experiment MVP dashboard reading Phase 9's `ReportGraph` — this round's scope); richer views (comparison, failure analysis) await Phase 7/8 output folded into `Report` |
 | 11 — Public Benchmark | Complete (benchmark documentation, reproducibility guide, and a regenerable public sample dashboard — this round's scope); a real published result still awaits an approved live comparison run |
-| 12 — External Reproduction | Not started |
+| 12 — External Reproduction | Complete (a free, zero-credential "smoke reproduction" exercising the real pipeline end-to-end via a deterministic fake LLM client, verified against a checked-in reference — this round's scope); a real, live-LLM comparison result still awaits an approved live comparison run |
 | 13 — CI / GitHub Integration | Not started |
 
 Per the strict phase gate ([[00-project-charter]] §Working protocol), Phase 9 does not begin
@@ -71,3 +71,21 @@ results" this round means making the one existing public-facing artifact,
 design) and `docs/REPRODUCING.md` (reproduction guide) — both public-facing, distinct from this
 internal memory bank (ADR-016). A real published result still requires an approved live comparison
 run, unchanged from Phase 6/7/8/9/10's status.
+
+Phase 12's exit criterion this round was "external users, independent runs, comparison"
+([[13-roadmap]]). Still no live comparison run against a real, paid LLM has ever been executed, so
+this round builds a free, zero-credential "smoke reproduction" (`npm run reproduce:smoke`,
+`src/experiments/runSmokeReproduction.ts`) that runs the *real* harness/agent/verifier/metrics/
+Phase 7/8 analysis/Phase 9 report/Phase 10 dashboard pipeline end-to-end using a new deterministic
+fake `LlmClient` (`src/harness/llm/deterministicFakeLlmClient.ts`) instead of a paid backend — the
+first time this pipeline has run against genuinely-executed, not hand-authored or purely synthetic,
+data. The run is compared against a checked-in reference
+(`docs/reproduction-reference/smoke-reference.json`, `src/experiments/reproductionReference.ts`/
+`compareRunResults.ts`) keyed by `(taskId, conditionName)` — never `report.json`'s random
+`conditionId` — giving concrete meaning to "comparison." Verified end-to-end by actually running
+`npm run reproduce:smoke` three independent times on the implementation machine: all 27
+(taskId, conditionName) entries matched the reference exactly every time (see ADR-017 in
+[[14-decisions]] and [[phases/phase-12]]). This is a mechanism/plumbing verification, not a
+performance benchmark — the fake agent never attempts to solve a task — so it does not close the
+"a real published result" gap; that still requires an approved live comparison run against a real,
+paid LLM, unchanged.

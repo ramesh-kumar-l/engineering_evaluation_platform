@@ -4,6 +4,9 @@ coverage/
 /experiment-results/
 /reports/
 /dashboard/
+/experiment-results-smoke/
+/reports-smoke/
+/dashboard-smoke/
 .env
 .env.*
 !.env.example

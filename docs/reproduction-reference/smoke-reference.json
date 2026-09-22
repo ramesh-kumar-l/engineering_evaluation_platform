@@ -1,0 +1,542 @@
+[
+  {
+    "taskId": "debugging-01",
+    "conditionName": "ecc",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "debugging-01",
+    "conditionName": "ecc-ablated:budgeting",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "debugging-01",
+    "conditionName": "ecc-ablated:history",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "debugging-01",
+    "conditionName": "ecc-ablated:memory",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "debugging-01",
+    "conditionName": "ecc-ablated:provenance",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "debugging-01",
+    "conditionName": "ecc-ablated:ranking",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "debugging-01",
+    "conditionName": "ecc-ablated:risk",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "debugging-01",
+    "conditionName": "ecc-ablated:verification",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "debugging-01",
+    "conditionName": "native",
+    "outcomeStatus": "TASK_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 119,
+      "tool-calls": 1,
+      "agent-turns": 1,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 1,
+      "provenance-completeness": 1,
+      "verification-completeness": 1
+    }
+  },
+  {
+    "taskId": "feature-01",
+    "conditionName": "ecc",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "feature-01",
+    "conditionName": "ecc-ablated:budgeting",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "feature-01",
+    "conditionName": "ecc-ablated:history",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "feature-01",
+    "conditionName": "ecc-ablated:memory",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "feature-01",
+    "conditionName": "ecc-ablated:provenance",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "feature-01",
+    "conditionName": "ecc-ablated:ranking",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "feature-01",
+    "conditionName": "ecc-ablated:risk",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "feature-01",
+    "conditionName": "ecc-ablated:verification",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "feature-01",
+    "conditionName": "native",
+    "outcomeStatus": "TASK_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 96,
+      "tool-calls": 1,
+      "agent-turns": 1,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 1,
+      "provenance-completeness": 1,
+      "verification-completeness": 1
+    }
+  },
+  {
+    "taskId": "refactoring-01",
+    "conditionName": "ecc",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "refactoring-01",
+    "conditionName": "ecc-ablated:budgeting",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "refactoring-01",
+    "conditionName": "ecc-ablated:history",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "refactoring-01",
+    "conditionName": "ecc-ablated:memory",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "refactoring-01",
+    "conditionName": "ecc-ablated:provenance",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "refactoring-01",
+    "conditionName": "ecc-ablated:ranking",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "refactoring-01",
+    "conditionName": "ecc-ablated:risk",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "refactoring-01",
+    "conditionName": "ecc-ablated:verification",
+    "outcomeStatus": "AGENT_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 0,
+      "tool-calls": 0,
+      "agent-turns": 0,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 0,
+      "provenance-completeness": 0,
+      "verification-completeness": 0
+    }
+  },
+  {
+    "taskId": "refactoring-01",
+    "conditionName": "native",
+    "outcomeStatus": "TASK_FAILURE",
+    "metrics": {
+      "task-success": 0,
+      "engineering-quality": 0.5,
+      "context-efficiency": 0,
+      "human-intervention": 0,
+      "context-tokens": 153,
+      "tool-calls": 1,
+      "agent-turns": 1,
+      "files-read": 0,
+      "files-changed": 0,
+      "retries": 0,
+      "failed-attempts": 1,
+      "provenance-completeness": 1,
+      "verification-completeness": 1
+    }
+  }
+]

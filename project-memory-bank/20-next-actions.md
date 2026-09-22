@@ -1,12 +1,12 @@
 # 20 — Next Actions
 
 1. **Immediate:** await explicit user approval to proceed with executing a live comparison run
-   (item 2 below), Phase 12 (External Reproduction), the remaining Phase 9 roadmap scope (item 2c
+   (item 2 below), Phase 13 (CI/GitHub Integration), the remaining Phase 9 roadmap scope (item 2c
    below), or richer Phase 10 dashboard views (item 2d below). Phase 7's roadmap scope (including
    failure analysis, item 2a below), Phase 8's orchestration follow-up (item 2b below), Phase 9's
    canonical Report/persistence format (item 2c below), Phase 10's dashboard MVP (item 2d below),
-   and Phase 11's benchmark documentation/reproducibility guide/regenerable demo (item 2e below)
-   are now all fully implemented.
+   Phase 11's benchmark documentation/reproducibility guide/regenerable demo (item 2e below), and
+   Phase 12's free smoke reproduction (item 2f below) are now all fully implemented.
 2. **Phase 6 remainder — now implemented, live execution still open:**
    - `LlmSolvingAgent` (`src/harness/agents/llmSolvingAgent.ts`) is the real, LLM-backed solving
      agent, supporting Claude, ChatGPT, Gemini, or a local model via `src/harness/llm/` (ADR-013
@@ -87,6 +87,20 @@
    *real* result (still gated on a live comparison run being executed and approved), any GitHub
    Pages/CI hosting automation (Phase 13's territory), and fixing the `modelName`/`modelVersion` gap
    (item 2 above) — `REPRODUCING.md` documents it as an open limitation, it does not resolve it.
+2f. **Phase 12 — now implemented:** `npm run reproduce:smoke`
+   (`src/experiments/runSmokeReproduction.ts`) runs the real harness/agent/verifier/metrics/Phase
+   7-8 analysis/Phase 9 report/Phase 10 dashboard pipeline end-to-end, for free, using a new
+   deterministic fake `LlmClient` (`src/harness/llm/deterministicFakeLlmClient.ts`) instead of a
+   paid backend — the first time this pipeline has run against genuinely-executed data. The result
+   is compared against a checked-in reference (`docs/reproduction-reference/smoke-reference.json`)
+   keyed by `(taskId, conditionName)` (`src/experiments/reproductionReference.ts`/
+   `compareRunResults.ts`) — never `report.json`'s random `conditionId`, which is minted fresh on
+   every `buildExperimentConditions()` call and can never be a stable cross-run key. See ADR-017 in
+   [[14-decisions]] and [[phases/phase-12]]. **Not yet done, by design:** a real published result
+   from an actual live LLM (the fake agent never attempts to solve a task — this proves pipeline
+   mechanics, not ECC's or any provider's quality); any mechanism for a second external user's
+   independently-produced report to be uploaded/compared against a first user's (Phase 13's
+   territory).
 3. **Fixture backlog (not phase-blocking, pick up incrementally):** 27 of the 30 tasks still use
    the `"unpinned"` sentinel — only `debugging-01`, `feature-01`, `refactoring-01` have real
    fixture source code, a real `commitSha`, and real verification coverage. Author the rest the
@@ -171,6 +185,19 @@
    ablation components, or condition design change, update `docs/BENCHMARK.md` in the same change
    — it has no automated freshness check against its `project-memory-bank/` sources.
 
-Do not execute a live comparison run before approval is given (master prompt §40). Phase 12
-(External Reproduction), the remaining Phase 9 roadmap scope (item 2c above), and richer Phase 10
+13. **Smoke-reproduction convention note (ADR-017):** the `fake-deterministic` `LlmProviderConfig`
+   (`src/harness/llm/`) exists solely for `npm run reproduce:smoke`; never wire it up as a
+   real-comparison-run option or a default. Any comparison mechanism that needs to identify "which
+   condition a run belongs to" across two independently-generated experiments must key off the raw
+   `RunResultBundle.conditionName` (stable), never `Run.conditionId`/`report.json` (a fresh random
+   id every `buildExperimentConditions()` call). `docs/reproduction-reference/smoke-reference.json`
+   is a checked-in file, regenerated manually (`extractReferenceEntries()` +
+   `writeReferenceEntries()`) only when a real change (a fixture's tests, the metric set, the
+   verifier set) legitimately changes the smoke path's expected output — never regenerated
+   automatically from a user's own run, which would defeat its purpose as an independent check.
+   `time-to-correct-outcome` must stay excluded from any such reference/comparison; it is the one
+   metric built from wall-clock timestamps and never reproduces exactly.
+
+Do not execute a live comparison run before approval is given (master prompt §40). Phase 13
+(CI/GitHub Integration), the remaining Phase 9 roadmap scope (item 2c above), and richer Phase 10
 dashboard views (item 2d above) also await explicit approval before implementation starts.

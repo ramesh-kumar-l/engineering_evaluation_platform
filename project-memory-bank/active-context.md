@@ -5,7 +5,7 @@ source code, if picking this project back up after a break.
 
 ## Where things stand right now
 
-Phase 0 (Foundation) through Phase 11 (Public Benchmark) are complete. Phase 6's full roadmap
+Phase 0 (Foundation) through Phase 12 (External Reproduction) are complete. Phase 6's full roadmap
 scope (real solving agent + actual comparison-run mechanism) is closed — see below. Phase 7 is
 complete against its *entire* roadmap row, including failure clustering — not just the
 confidence-intervals-and-effect-size scope from the round that first implemented it. Phase 8
@@ -15,10 +15,36 @@ persistence format with full Runs→Metrics→Evidence traceability — CSV/Mark
 roadmap backlog. Phase 10 (Dashboard) is implemented and verified, scoped to a feasibility spike
 plus a static, single-experiment MVP dashboard reading Phase 9's `ReportGraph` format. Phase 11
 (Public Benchmark) is implemented and verified, scoped to public-facing benchmark documentation, a
-reproducibility guide, and a regenerable synthetic public sample — a real published result still
-awaits an approved live comparison run (see below).
+reproducibility guide, and a regenerable synthetic public sample. Phase 12 (External Reproduction)
+is implemented and verified, scoped to a free, zero-credential "smoke reproduction" of the real
+pipeline, checked against a committed reference — a real published result from an actual live LLM
+still awaits an approved live comparison run (see below).
 
-**Phase 11 (this session):** New public-facing documentation under `docs/` (distinct from this
+**Phase 12 (this session):** `npm run reproduce:smoke` (`src/experiments/runSmokeReproduction.ts`)
+runs the *real* harness → agent → verifier → metrics → Phase 7/8 analysis → Phase 9 report → Phase
+10 dashboard pipeline end-to-end, for free, using a new `DeterministicFakeLlmClient`
+(`src/harness/llm/deterministicFakeLlmClient.ts`) instead of a paid LLM backend — a pure, stateless
+fake that calls `list_files` once then concludes, never editing anything, so it can never be tuned
+to favor one condition. This is the first time the pipeline has run against genuinely-executed
+(not hand-authored, not purely synthetic) data. Two correctness issues were caught before writing
+any code (via a Plan-subagent review) and are now load-bearing design decisions: (1) `Condition.id`
+is a fresh random id on every `buildExperimentConditions()` call, so any cross-run comparison must
+key off the raw `RunResultBundle.conditionName` (stable: `'native'`, `'ecc'`,
+`ecc-ablated:<component>`), never `Run.conditionId`/`report.json`; (2) `time-to-correct-outcome` is
+built from wall-clock timestamps and must be excluded from any reference/comparison. New
+`src/experiments/reproductionReference.ts`/`compareRunResults.ts` implement this, comparing a fresh
+run against a checked-in `docs/reproduction-reference/smoke-reference.json` (27 entries) — a
+`'native'`-condition mismatch is always a hard failure; an ECC-based condition's mismatch is
+downgraded to informational only when a local `ecc` CLI is detected
+(`eccAvailabilityCheck.ts`), since `runHarness.ts` already catches `ContextProvider` failures
+without crashing the loop, so the 8 ECC-based conditions are only deterministic when no ECC is
+reachable. Verified by actually running `npm run reproduce:smoke` three independent times on the
+implementation machine (no local ECC CLI): every run's all 27 `(taskId, conditionName)` entries
+matched the reference exactly. `docs/REPRODUCING.md` gained a new "Step 0" section describing this
+as the thing to try before spending real money on a live run. Full detail in [[phases/phase-12]]
+and ADR-017 in [[14-decisions]].
+
+**Phase 11:** New public-facing documentation under `docs/` (distinct from this
 internal `project-memory-bank/`, per ADR-016): `docs/BENCHMARK.md` (task categories, fixture
 status, the 9-condition experiment design, verification/metrics methodology, the
 scientific-integrity commitment) and `docs/REPRODUCING.md` (prerequisites, LLM provider env vars
@@ -151,11 +177,15 @@ deliberately unimplemented (ADR-009). Full detail in [[phases/phase-05]].
 ## What is NOT done
 
 **A real published benchmark result does not exist yet.** Phase 11's `docs/BENCHMARK.md`/
-`docs/REPRODUCING.md` document the benchmark's design and how to reproduce it, and
-`docs/sample-dashboard.html` is an explicitly-labeled synthetic demo, regenerable via
-`npm run demo:generate` — none of this is a real finding. That still requires an approved live
-comparison run (see below) followed by the existing `report:generate`/`dashboard:generate`
-pipeline. No GitHub Pages/CI publishing automation exists (Phase 13's territory).
+`docs/REPRODUCING.md` document the benchmark's design and how to reproduce it,
+`docs/sample-dashboard.html` is an explicitly-labeled synthetic demo regenerable via
+`npm run demo:generate`, and Phase 12's `npm run reproduce:smoke` proves the pipeline mechanics
+reproduce identically across machines for free — none of this is a real finding, since the smoke
+path's agent never attempts to solve a task. That still requires an approved live comparison run
+against a real, paid LLM (see below) followed by the existing `report:generate`/
+`dashboard:generate` pipeline. No GitHub Pages/CI publishing automation exists (Phase 13's
+territory), and no mechanism exists yet for one external user's independently-produced report to
+be compared against another's (also Phase 13's territory).
 
 **Richer dashboard views don't exist yet.** `src/dashboard/` (Phase 10) renders only a single
 experiment's `ReportGraph` — [[12-dashboard-strategy]]'s full target view list (multi-experiment/
@@ -194,13 +224,13 @@ assume any of these exist without checking `implementation-status.md` first.
 
 ## Immediate next step
 
-Per the master prompt's strict phase gate, this Phase 11 work's completion is reported to the user
-and no further Phase 12 work or live run has started. Do not begin further work, and do not
+Per the master prompt's strict phase gate, this Phase 12 work's completion is reported to the user
+and no further Phase 13 work or live run has started. Do not begin further work, and do not
 execute a live comparison run, without an explicit new approval message from the user, even if
 this file is being read in a fresh session — see [[20-next-actions]] and [[00-project-charter]]
-§Working protocol. Phases 6, 7, 8, 9, 10, and 11 are now all fully complete against this round's
-scope; the next open items are: executing a live comparison run (needs the user's own LLM
-credentials and an explicit go-ahead), Phase 12 (External Reproduction), the remaining Phase 9
+§Working protocol. Phases 6, 7, 8, 9, 10, 11, and 12 are now all fully complete against this
+round's scope; the next open items are: executing a live comparison run (needs the user's own LLM
+credentials and an explicit go-ahead), Phase 13 (CI/GitHub Integration), the remaining Phase 9
 roadmap scope (CSV/Markdown/HTML export), or richer Phase 10 dashboard views (multi-experiment
 comparison, failure analysis — needs Phase 7/8 output folded into `Report` first).
 
@@ -283,3 +313,12 @@ comparison, failure analysis — needs Phase 7/8 output folded into `Report` fir
   design (task categories, ablation components, condition list) changes, update
   `docs/BENCHMARK.md` in the same change — it has no automated freshness check against its
   `project-memory-bank/` sources.
+- Smoke-reproduction convention (ADR-017): the `'fake-deterministic'` `LlmProviderConfig` exists
+  only for `npm run reproduce:smoke` — never make it a default or wire it into a real comparison
+  run. Any code comparing runs across two independently-generated experiments must key by
+  `(taskId, conditionName)` from raw `RunResultBundle`s, never by `Run.conditionId`/`report.json`
+  (a fresh random id every `buildExperimentConditions()` call). `docs/reproduction-reference/
+  smoke-reference.json` is a checked-in file, regenerated manually only when a real change (a
+  fixture's tests, the metric/verifier set) legitimately changes the smoke path's expected output
+  — never regenerated automatically from a user's own run. `time-to-correct-outcome` must stay
+  excluded from any such comparison; it is wall-clock-derived and never reproduces exactly.

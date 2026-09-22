@@ -64,34 +64,40 @@ Update this whenever a major feature/module is finished, not only at phase bound
 | `llm/llmClient.types.ts` (`LlmClient`/`LlmMessage`/`LlmToolCall` — neutral, vendor-independent shape, ADR-013) | Done (Phase 6 remainder) |
 | `llm/anthropicLlmClient.ts` (`AnthropicLlmClient` — covers Claude) | Done (Phase 6 remainder) |
 | `llm/openAiCompatibleLlmClient.ts` (`OpenAiCompatibleLlmClient` — covers ChatGPT, Gemini, local models) | Done (Phase 6 remainder) |
-| `llm/createLlmClient.ts` (factory over an explicit `LlmProviderConfig`, no hardcoded default) | Done (Phase 6 remainder) |
+| `llm/createLlmClient.ts` (factory over an explicit `LlmProviderConfig`, no hardcoded default) | Done (Phase 6 remainder; extended Phase 12 with `'fake-deterministic'`) |
+| `llm/deterministicFakeLlmClient.ts` (`DeterministicFakeLlmClient` — zero-cost, zero-network, pure/stateless fake for Phase 12's smoke reproduction) | Done (Phase 12) |
 | `agents/llmAgentTools.ts` (`list_files`/`read_file`/`write_file`/`run_tests` — path-clamped, no shell-exec) | Done (Phase 6 remainder) |
 | `agents/promptBuilder.ts` (system prompt + initial user message from `Task`/`ContextArtifact`) | Done (Phase 6 remainder) |
 | `agents/llmSolvingAgent.ts` (`LlmSolvingAgent implements Agent` — the real, multi-provider solving agent, ADR-013) | Done (Phase 6 remainder) |
 | `runHarness.ts` (`executeRun` — Task+Condition+Agent+ContextProvider → Run+Trace; carries an optional `onBeforeCleanup` hook (Phase 4) and now also returns the full `contextArtifact` on `HarnessRunOutcome` (Phase 5, ADR-009)) | Done — `Run.metadata.modelName`/`modelVersion` still not wired through, see [[20-next-actions]] |
 | `index.ts` (barrel) | Done |
 
-## docs/ (Phase 11, public-facing — not internal memory bank)
+## docs/ (Phase 11-12, public-facing — not internal memory bank)
 
 | File | Status |
 |---|---|
-| `docs/BENCHMARK.md` (benchmark design: categories, fixture status, 9-condition design, verification/metrics methodology, scientific-integrity commitment) | Done |
-| `docs/REPRODUCING.md` (reproduction guide: prerequisites, LLM provider config, command sequence, required metadata, versioning, immutability, publishing, current limitations) | Done |
-| `docs/sample-dashboard.html` (now a build output of `npm run demo:generate`, not hand-copied) | Done |
+| `docs/BENCHMARK.md` (benchmark design: categories, fixture status, 9-condition design, verification/metrics methodology, scientific-integrity commitment, smoke-reproduction status note) | Done |
+| `docs/REPRODUCING.md` (reproduction guide: Step 0 free smoke reproduction, LLM provider config, command sequence, required metadata, versioning, immutability, publishing, current limitations) | Done |
+| `docs/sample-dashboard.html` (build output of `npm run demo:generate`, not hand-copied) | Done (Phase 11) |
+| `docs/reproduction-reference/smoke-reference.json` (checked-in reference for `npm run reproduce:smoke`'s comparison, 27 `(taskId, conditionName)` entries) | Done (Phase 12) |
 
-## src/experiments/ (Phase 6 remainder, extended Phase 9/10/11)
+## src/experiments/ (Phase 6 remainder, extended Phase 9/10/11/12)
 
 | Module | Status |
 |---|---|
 | `experimentConditions.ts` (`buildExperimentConditions` — the 9 real conditions: native + full ECC + 7 ablations) | Done |
-| `llmProviderConfigFromEnv.ts` (`llmProviderConfigFromEnv`/`agentBudgetConfigFromEnv` — env-var-driven, no hardcoded default provider) | Done |
+| `llmProviderConfigFromEnv.ts` (`llmProviderConfigFromEnv`/`agentBudgetConfigFromEnv` — env-var-driven, no hardcoded default provider; extended Phase 12 with `'fake-deterministic'`) | Done |
 | `resultsWriter.ts` (`writeRunResult`/`readAllRunResults`/`latestExperimentId` — raw JSON dump to gitignored `experiment-results/`, a crash-safe write-ahead record, not the canonical Phase 9 artifact) | Done |
-| `runComparisonExperiment.ts` (main loop: 3 real-fixture tasks × 9 conditions × 3 repetitions; runnable via `npm run experiment:run`) | Done — mechanism only; no live run executed yet |
-| `analyzeComparisonResults.ts` (reads dumped bundles back, drives Phase 7 (repeated-run + failure clustering)/8's analysis unchanged; runnable via `npm run experiment:analyze`) | Done — proven against synthetic bundles in tests; not yet run against live data |
-| `generateReport.ts` (reads dumped bundles back, builds+persists the canonical `ReportGraph` via `src/reporting/`; runnable via `npm run report:generate`) | Done (Phase 9) — proven against synthetic bundles in tests; not yet run against live data |
-| `generateDashboard.ts` (reads a persisted `report.json` back, renders+writes the static dashboard via `src/dashboard/`; runnable via `npm run dashboard:generate`) | Done (Phase 10) — proven against synthetic fixtures in tests; not yet run against live data |
+| `runComparisonExperiment.ts` (main loop: 3 real-fixture tasks × 9 conditions × 3 repetitions; runnable via `npm run experiment:run`; extended Phase 12 with an optional `llmProviderConfig` override) | Done — mechanism only; no live LLM run executed yet |
+| `analyzeComparisonResults.ts` (reads dumped bundles back, drives Phase 7 (repeated-run + failure clustering)/8's analysis unchanged; runnable via `npm run experiment:analyze`) | Done — proven against synthetic bundles in tests; not yet run against live LLM data |
+| `generateReport.ts` (reads dumped bundles back, builds+persists the canonical `ReportGraph` via `src/reporting/`; runnable via `npm run report:generate`) | Done (Phase 9) — proven against synthetic bundles and Phase 12's smoke data; not yet run against live LLM data |
+| `generateDashboard.ts` (reads a persisted `report.json` back, renders+writes the static dashboard via `src/dashboard/`; runnable via `npm run dashboard:generate`) | Done (Phase 10) — proven against synthetic fixtures and Phase 12's smoke data; not yet run against live LLM data |
 | `demoRunRecords.ts` (`demoRunRecords` — two literal, explicitly-synthetic `EvaluatedRunRecord`s, native-failure + ecc-success on `debugging-01`) | Done (Phase 11) |
 | `generateDemoDashboard.ts` (`generateDemoDashboard` — reuses `buildReport`/`renderDashboardPage` unchanged to (re)write `docs/sample-dashboard.html`; runnable via `npm run demo:generate`) | Done (Phase 11) |
+| `eccAvailabilityCheck.ts` (`isEccCliAvailable` — best-effort local-ECC-CLI probe, used only to classify a comparison mismatch as hard vs informational) | Done (Phase 12) |
+| `reproductionReference.ts` (`ReferenceEntry`/`extractReferenceEntries`/`readReferenceEntries`/`writeReferenceEntries` — the stable `(taskId, conditionName)`-keyed comparison shape) | Done (Phase 12) |
+| `compareRunResults.ts` (`compareReferenceEntries` — pure comparison, native-hard/ECC-informational scoping) | Done (Phase 12) |
+| `runSmokeReproduction.ts` (`runSmokeReproduction` — the Phase 12 entry point; runnable via `npm run reproduce:smoke`) | Done (Phase 12) — verified across 3 independent real runs, all matched the reference exactly |
 | `index.ts` (barrel) | Done |
 
 ## src/reporting/ (Phase 9)
@@ -186,23 +192,27 @@ CSV/Markdown/HTML report export formats (remaining Phase 9 roadmap scope beyond 
 canonical entity/persistence exit criterion), richer dashboard views — multi-experiment
 comparison, complexity/category breakdowns, failure-cluster views (remaining Phase 10 scope
 beyond this round's single-experiment MVP; needs Phase 7/8 analysis output folded into `Report`
-first). A real *published* benchmark result (Phase 11's `docs/` covers documentation/reproduction/
-a regenerable synthetic demo only, per this round's scope — see [[phases/phase-11]]).
+first). A real *published* benchmark result from an actual live LLM (Phase 11's `docs/` covers
+documentation/reproduction/a regenerable synthetic demo, and Phase 12 adds a free, verified smoke
+reproduction of the pipeline mechanics — see [[phases/phase-11]]/[[phases/phase-12]] — but no live
+LLM comparison run has been executed).
 
 ## Verification snapshot
 
-Last run: `npm run build && npm test && npm run lint` — clean build, 302 tests passing across 80
-files (0 failures this run; the previously-observed `eccCliInvoker.test.ts` subprocess-spawn
-timing flake did not reproduce, consistent with it being load-dependent flakiness, not a
-regression), zero lint errors. Confirmed no test files leak into `dist/` after
-`rm -rf dist && npm run build`; all five CLI entry points
+Last run: `npm run build && npm test && npm run lint` — clean build, 327 tests passing across 85
+files (0 failures this run), zero lint errors. Confirmed no test files leak into `dist/` after
+`rm -rf dist && npm run build`; all six CLI entry points
 (`dist/experiments/runComparisonExperiment.js`, `dist/experiments/analyzeComparisonResults.js`,
 `dist/experiments/generateReport.js`, `dist/experiments/generateDashboard.js`,
-`dist/experiments/generateDemoDashboard.js`) compiled correctly. Ran `npm run demo:generate` for
-real and diffed the regenerated `docs/sample-dashboard.html` against its previously-committed
-version — identical apart from the randomly-generated report/evaluation ids, confirming the script
-faithfully reproduces the artifact.
-Largest new/edited file (Phase 11) is `src/experiments/demoRunRecords.ts` at 102 lines;
+`dist/experiments/generateDemoDashboard.js`, `dist/experiments/runSmokeReproduction.js`) compiled
+correctly. Ran `npm run demo:generate` for real (Phase 11) and diffed the regenerated
+`docs/sample-dashboard.html` against its previously-committed version — identical apart from the
+randomly-generated report/evaluation ids. Ran `npm run reproduce:smoke` for real, three independent
+times (Phase 12), against the actual fixtures with no local `ecc` CLI available — every run
+produced identical results (all 3 native runs `TASK_FAILURE` with real metrics; all 24 ECC-based
+runs `AGENT_FAILURE`, context provider unreachable) and matched the checked-in
+`docs/reproduction-reference/smoke-reference.json` exactly, all 27 entries, every time.
+Largest new/edited file (Phase 12) is `src/experiments/runSmokeReproduction.ts` at 117 lines;
 largest orchestration script remains `src/experiments/generateReport.ts` at 78 lines — all
 comfortably under the 300-line ceiling.
 Re-run this before trusting this ledger; it is a snapshot, not a live status.

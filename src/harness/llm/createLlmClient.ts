@@ -1,4 +1,5 @@
 import { AnthropicLlmClient } from './anthropicLlmClient.js';
+import { DeterministicFakeLlmClient } from './deterministicFakeLlmClient.js';
 import type { LlmClient } from './llmClient.types.js';
 import { OpenAiCompatibleLlmClient } from './openAiCompatibleLlmClient.js';
 
@@ -16,6 +17,15 @@ export type LlmProviderConfig =
       readonly model: string;
       readonly apiKey?: string;
       readonly maxTokens?: number;
+    }
+  | {
+      /**
+       * Zero-cost, zero-network, fully deterministic client for Phase 12's smoke reproduction
+       * path (`src/experiments/runSmokeReproduction.ts`) — never a real vendor, never billed,
+       * never sends anything off the machine. See ADR-017 in project-memory-bank/14-decisions.md.
+       */
+      readonly provider: 'fake-deterministic';
+      readonly model?: string;
     };
 
 /**
@@ -32,5 +42,7 @@ export function createLlmClient(config: LlmProviderConfig): LlmClient {
       return new AnthropicLlmClient(config);
     case 'openai-compatible':
       return new OpenAiCompatibleLlmClient(config);
+    case 'fake-deterministic':
+      return new DeterministicFakeLlmClient(config.model);
   }
 }

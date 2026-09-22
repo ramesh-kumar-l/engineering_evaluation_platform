@@ -13,22 +13,25 @@ engineering tasks, capturing full traces and producing reproducible, falsifiable
 
 ## Status
 
-Phase 11 of 13 complete — see
+Phase 12 of 13 complete — see
 [`project-memory-bank/19-phase-status.md`](project-memory-bank/19-phase-status.md) for the
 per-phase ledger and [`project-memory-bank/13-roadmap.md`](project-memory-bank/13-roadmap.md) for
-the full roadmap. **302 tests passing across 80 files** (verified 2026-09-22: `npm test`).
+the full roadmap. **327 tests passing across 85 files** (verified 2026-09-22: `npm test`).
 
 Built and working: the evaluation contract and 14-entity domain model, a 30-task benchmark (3
 with real fixture code and pinned commits), an isolated experiment harness, deterministic
 verification, a 14-of-22-metric scoring engine, a hand-rolled statistics module (confidence
 intervals, effect sizes, failure clustering), a real ECC `ContextProvider` integration
 (subprocess CLI invocation, plus per-component ablation), canonical `Report`/`ReportGraph`
-persistence, a static HTML dashboard MVP, and public-facing benchmark/reproducibility
-documentation.
+persistence, a static HTML dashboard MVP, public-facing benchmark/reproducibility documentation,
+and a free, zero-credential "smoke reproduction" that runs the real pipeline end-to-end and
+verifies it against a checked-in reference.
 
-Not yet done: executing a live comparison run against a real LLM backend (the mechanism is built
-and tested end-to-end against synthetic data; it needs the user's own API key or local model and
-an explicit `npm run experiment:run`), and Phase 12+ (external reproduction, CI integration). See
+Not yet done: executing a live comparison run against a real, paid LLM backend (the mechanism is
+built and verified end-to-end — including against genuinely-executed, not just synthetic, data via
+`npm run reproduce:smoke` — but running it with a real LLM actually attempting each task needs the
+user's own API key or local model and an explicit `npm run experiment:run`), and Phase 13 (CI/
+GitHub integration). See
 [`project-memory-bank/20-next-actions.md`](project-memory-bank/20-next-actions.md) for the full
 backlog.
 
@@ -37,7 +40,8 @@ backlog.
 - [`docs/BENCHMARK.md`](docs/BENCHMARK.md) — what the benchmark measures, task categories, fixture
   status, the 9-condition experiment design, verification/metrics methodology.
 - [`docs/REPRODUCING.md`](docs/REPRODUCING.md) — step-by-step guide to running a comparison
-  yourself, required run metadata, and current limitations.
+  yourself, including a free `npm run reproduce:smoke` path that needs no credentials, required
+  run metadata, and current limitations.
 
 ## Start here
 
