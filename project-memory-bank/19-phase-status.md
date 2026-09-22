@@ -15,7 +15,7 @@
 | 10 — Dashboard Feasibility / MVP | Complete (feasibility spike + static, single-experiment MVP dashboard reading Phase 9's `ReportGraph` — this round's scope); richer views (comparison, failure analysis) await Phase 7/8 output folded into `Report` |
 | 11 — Public Benchmark | Complete (benchmark documentation, reproducibility guide, and a regenerable public sample dashboard — this round's scope); a real published result still awaits an approved live comparison run |
 | 12 — External Reproduction | Complete (a free, zero-credential "smoke reproduction" exercising the real pipeline end-to-end via a deterministic fake LLM client, verified against a checked-in reference — this round's scope); a real, live-LLM comparison result still awaits an approved live comparison run |
-| 13 — CI / GitHub Integration | Not started |
+| 13 — CI / GitHub Integration | Complete (CI wiring around the real `reproduce:smoke` pipeline, a manual-opt-in GitHub Pages hosting mechanism, and an offline cross-user report comparison CLI — this round's scope); `format:check` and enabling Pages/pushing to GitHub remain open, deliberately deferred |
 
 Per the strict phase gate ([[00-project-charter]] §Working protocol), Phase 9 does not begin
 until the user explicitly approves proceeding past Phase 8. Phase 6 is now complete against
@@ -89,3 +89,20 @@ data. The run is compared against a checked-in reference
 performance benchmark — the fake agent never attempts to solve a task — so it does not close the
 "a real published result" gap; that still requires an approved live comparison run against a real,
 paid LLM, unchanged.
+
+Phase 13's exit criterion this round was "automated runs wired into CI, cross-user report
+comparison/hosting." `.github/workflows/ci.yml` runs build/lint/test plus the real
+`reproduce:smoke` pipeline (invoked directly, not via its npm script, to avoid a redundant
+rebuild) on every push/PR, on a Node 20.x/22.x matrix — a genuinely independent machine
+re-proving reproducibility on every CI run, not a live LLM job (no secrets, no cost, safe on fork
+PRs). `.github/workflows/pages.yml` (manual-trigger-only) can publish `docs/` — including a new
+`docs/index.html` landing page — as a static GitHub Pages site, framed as compliant with
+[[04-architecture]]'s local-first mandate since GitHub, not EEP, operates the hosting. New
+`src/experiments/independentRunDiff.ts`/`compareIndependentRuns.ts` (`npm run report:compare`)
+give two users a purely offline, local CLI to diff their independently-produced result sets — a
+new symmetric `diffEntrySets()`, deliberately not reusing `compareReferenceEntries()`'s asymmetric
+reference-vs-actual semantics, sharing only the extracted `diffEntryFields()` helper. See ADR-018
+in [[14-decisions]] and [[phases/phase-13]]. Deliberately deferred: a `format:check` CI gate (the
+repo has ~105 files of pre-existing formatting drift needing its own explicit reformat commit
+first), and actually enabling GitHub Pages / pushing anything to GitHub (the user's explicit,
+separately-confirmed action).

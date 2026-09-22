@@ -72,16 +72,24 @@ Update this whenever a major feature/module is finished, not only at phase bound
 | `runHarness.ts` (`executeRun` — Task+Condition+Agent+ContextProvider → Run+Trace; carries an optional `onBeforeCleanup` hook (Phase 4) and now also returns the full `contextArtifact` on `HarnessRunOutcome` (Phase 5, ADR-009)) | Done — `Run.metadata.modelName`/`modelVersion` still not wired through, see [[20-next-actions]] |
 | `index.ts` (barrel) | Done |
 
-## docs/ (Phase 11-12, public-facing — not internal memory bank)
+## .github/ (Phase 13)
+
+| File | Status |
+|---|---|
+| `workflows/ci.yml` (build/lint/test + direct `runSmokeReproduction.js` invocation on push/PR, Node 20.x/22.x matrix, `permissions`/`concurrency` hardening) | Done — reviewed for structural correctness; unverified against a real GitHub Actions execution since nothing was pushed this round |
+| `workflows/pages.yml` (`workflow_dispatch`-only two-job GitHub Pages publish of `docs/`) | Done — same caveat; also requires the user to enable Pages in repo Settings first |
+
+## docs/ (Phase 11-13, public-facing — not internal memory bank)
 
 | File | Status |
 |---|---|
 | `docs/BENCHMARK.md` (benchmark design: categories, fixture status, 9-condition design, verification/metrics methodology, scientific-integrity commitment, smoke-reproduction status note) | Done |
-| `docs/REPRODUCING.md` (reproduction guide: Step 0 free smoke reproduction, LLM provider config, command sequence, required metadata, versioning, immutability, publishing, current limitations) | Done |
+| `docs/REPRODUCING.md` (reproduction guide: Step 0 free smoke reproduction, LLM provider config, command sequence, required metadata, versioning, immutability, publishing, cross-user comparison, GitHub Pages publishing, current limitations) | Done |
 | `docs/sample-dashboard.html` (build output of `npm run demo:generate`, not hand-copied) | Done (Phase 11) |
 | `docs/reproduction-reference/smoke-reference.json` (checked-in reference for `npm run reproduce:smoke`'s comparison, 27 `(taskId, conditionName)` entries) | Done (Phase 12) |
+| `docs/index.html` (small, hand-authored, self-contained GitHub Pages landing page — no build step, no Markdown renderer) | Done (Phase 13) |
 
-## src/experiments/ (Phase 6 remainder, extended Phase 9/10/11/12)
+## src/experiments/ (Phase 6 remainder, extended Phase 9/10/11/12/13)
 
 | Module | Status |
 |---|---|
@@ -96,8 +104,10 @@ Update this whenever a major feature/module is finished, not only at phase bound
 | `generateDemoDashboard.ts` (`generateDemoDashboard` — reuses `buildReport`/`renderDashboardPage` unchanged to (re)write `docs/sample-dashboard.html`; runnable via `npm run demo:generate`) | Done (Phase 11) |
 | `eccAvailabilityCheck.ts` (`isEccCliAvailable` — best-effort local-ECC-CLI probe, used only to classify a comparison mismatch as hard vs informational) | Done (Phase 12) |
 | `reproductionReference.ts` (`ReferenceEntry`/`extractReferenceEntries`/`readReferenceEntries`/`writeReferenceEntries` — the stable `(taskId, conditionName)`-keyed comparison shape) | Done (Phase 12) |
-| `compareRunResults.ts` (`compareReferenceEntries` — pure comparison, native-hard/ECC-informational scoping) | Done (Phase 12) |
-| `runSmokeReproduction.ts` (`runSmokeReproduction` — the Phase 12 entry point; runnable via `npm run reproduce:smoke`) | Done (Phase 12) — verified across 3 independent real runs, all matched the reference exactly |
+| `compareRunResults.ts` (`compareReferenceEntries`/`diffEntryFields` — pure comparison, native-hard/ECC-informational scoping; `diffEntryFields` extracted+exported Phase 13 for reuse) | Done (Phase 12; extended Phase 13) |
+| `runSmokeReproduction.ts` (`runSmokeReproduction` — the Phase 12 entry point; runnable via `npm run reproduce:smoke`; now also the exact step `ci.yml` runs on every push/PR) | Done (Phase 12) — verified across 3 independent real runs, all matched the reference exactly |
+| `independentRunDiff.ts` (`diffEntrySets`/`formatDiffMarkdown` — symmetric peer-comparison diff + Markdown summary, deliberately distinct from `compareReferenceEntries`'s asymmetric semantics) | Done (Phase 13) |
+| `compareIndependentRuns.ts` (`compareIndependentRuns` — the Phase 13 cross-user comparison entry point; runnable via `npm run report:compare`) | Done (Phase 13) — verified for real locally against a fresh smoke run compared with itself |
 | `index.ts` (barrel) | Done |
 
 ## src/reporting/ (Phase 9)
@@ -193,18 +203,24 @@ canonical entity/persistence exit criterion), richer dashboard views — multi-e
 comparison, complexity/category breakdowns, failure-cluster views (remaining Phase 10 scope
 beyond this round's single-experiment MVP; needs Phase 7/8 analysis output folded into `Report`
 first). A real *published* benchmark result from an actual live LLM (Phase 11's `docs/` covers
-documentation/reproduction/a regenerable synthetic demo, and Phase 12 adds a free, verified smoke
-reproduction of the pipeline mechanics — see [[phases/phase-11]]/[[phases/phase-12]] — but no live
-LLM comparison run has been executed).
+documentation/reproduction/a regenerable synthetic demo, Phase 12 adds a free, verified smoke
+reproduction of the pipeline mechanics, and Phase 13 adds CI wiring around it plus a manual-opt-in
+GitHub Pages hosting mechanism and an offline cross-user comparison CLI — see
+[[phases/phase-11]]/[[phases/phase-12]]/[[phases/phase-13]] — but no live LLM comparison run has
+been executed). A `format:check`/prettier CI gate (the repo has ~105 files of pre-existing
+formatting drift; needs its own explicit, disclosed reformat commit first — see ADR-018).
+Actually enabling GitHub Pages in repo Settings, or pushing anything from this session to GitHub
+(the user's own, separately-confirmed next action).
 
 ## Verification snapshot
 
-Last run: `npm run build && npm test && npm run lint` — clean build, 327 tests passing across 85
+Last run: `npm run build && npm test && npm run lint` — clean build, 335 tests passing across 87
 files (0 failures this run), zero lint errors. Confirmed no test files leak into `dist/` after
-`rm -rf dist && npm run build`; all six CLI entry points
+`rm -rf dist && npm run build`; all eight CLI entry points
 (`dist/experiments/runComparisonExperiment.js`, `dist/experiments/analyzeComparisonResults.js`,
 `dist/experiments/generateReport.js`, `dist/experiments/generateDashboard.js`,
-`dist/experiments/generateDemoDashboard.js`, `dist/experiments/runSmokeReproduction.js`) compiled
+`dist/experiments/generateDemoDashboard.js`, `dist/experiments/runSmokeReproduction.js`,
+`dist/experiments/compareIndependentRuns.js`, `dist/experiments/independentRunDiff.js`) compiled
 correctly. Ran `npm run demo:generate` for real (Phase 11) and diffed the regenerated
 `docs/sample-dashboard.html` against its previously-committed version — identical apart from the
 randomly-generated report/evaluation ids. Ran `npm run reproduce:smoke` for real, three independent
@@ -212,7 +228,11 @@ times (Phase 12), against the actual fixtures with no local `ecc` CLI available 
 produced identical results (all 3 native runs `TASK_FAILURE` with real metrics; all 24 ECC-based
 runs `AGENT_FAILURE`, context provider unreachable) and matched the checked-in
 `docs/reproduction-reference/smoke-reference.json` exactly, all 27 entries, every time.
-Largest new/edited file (Phase 12) is `src/experiments/runSmokeReproduction.ts` at 117 lines;
-largest orchestration script remains `src/experiments/generateReport.ts` at 78 lines — all
-comfortably under the 300-line ceiling.
+Ran `node dist/experiments/runSmokeReproduction.js` again for real (Phase 13, the exact command
+`ci.yml` invokes) and `node dist/experiments/compareIndependentRuns.js` against that fresh run
+compared with itself (27 matched, 0 differing, `--out` Markdown file inspected) — both succeeded.
+The new GitHub Actions workflow YAML itself is reviewed but unverified against a real GitHub
+Actions execution, since nothing was pushed this round.
+Largest new/edited file (Phase 13) is `src/experiments/compareIndependentRuns.ts` at 129 lines;
+all files remain comfortably under the 300-line ceiling.
 Re-run this before trusting this ledger; it is a snapshot, not a live status.

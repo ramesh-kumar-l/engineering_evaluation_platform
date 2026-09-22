@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Engineering Evaluation Platform (EEP)</title>
+    <style>
+      body {
+        font-family: -apple-system, Segoe UI, Helvetica, Arial, sans-serif;
+        max-width: 46rem;
+        margin: 3rem auto;
+        padding: 0 1.5rem;
+        line-height: 1.55;
+        color: #1a1a1a;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      .notice {
+        background: #fff4e5;
+        border: 1px solid #e0a458;
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        margin: 1.5rem 0;
+      }
+      ul {
+        padding-left: 1.25rem;
+      }
+      code {
+        background: #f2f2f2;
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+      }
+      footer {
+        margin-top: 2.5rem;
+        font-size: 0.85rem;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Engineering Evaluation Platform (EEP)</h1>
+    <p>
+      Reproducible evaluation infrastructure for AI-assisted software engineering. This page is a
+      static landing page published from this repository's <code>docs/</code> folder via GitHub
+      Pages &mdash; see the
+      <a href="https://github.com/ramesh-kumar-l/Engineering-Evaluation-Platform-EEP-">source
+        repository</a>
+      for everything else.
+    </p>
+
+    <div class="notice">
+      No real, live-LLM benchmark result has been published yet. Everything linked below is either
+      a test fixture, a free mechanism-verification run, or an explicitly labeled synthetic demo
+      &mdash; see each artifact's own limitations section before drawing any conclusion from it.
+    </div>
+
+    <ul>
+      <li>
+        <a href="sample-dashboard.html">Sample dashboard</a> &mdash; a real, self-contained
+        rendering of the dashboard produced by <code>npm run demo:generate</code>, against two
+        literal synthetic runs. Demonstrates the dashboard renderer, not a benchmark result.
+      </li>
+      <li>
+        <a href="https://github.com/ramesh-kumar-l/Engineering-Evaluation-Platform-EEP-/blob/main/docs/BENCHMARK.md">BENCHMARK.md</a>
+        &mdash; what the benchmark measures, task categories, and experiment design. Served here as
+        a raw file (this site has no Markdown renderer); best read on GitHub.
+      </li>
+      <li>
+        <a href="https://github.com/ramesh-kumar-l/Engineering-Evaluation-Platform-EEP-/blob/main/docs/REPRODUCING.md">REPRODUCING.md</a>
+        &mdash; how to run the benchmark yourself, including a free
+        <code>npm run reproduce:smoke</code> path that needs no credentials, and how to compare
+        your results against someone else's.
+      </li>
+    </ul>
+
+    <footer>Apache License 2.0.</footer>
+  </body>
+</html>

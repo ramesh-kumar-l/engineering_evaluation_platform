@@ -97,6 +97,45 @@ resource references — copy it anywhere (a gist, a GitHub Pages branch, attache
 share it. `report.json` is the underlying data if a reader wants to verify or re-derive a number
 themselves.
 
+## Cross-user comparison
+
+Once you and another EEP user each have your own raw results
+(`experiment-results/<experimentId>/` from `npm run experiment:run`, or
+`experiment-results-smoke/<experimentId>/` from `npm run reproduce:smoke`), you can diff them
+entirely offline — nothing is uploaded to EEP or any third party. Exchange the
+`<resultsDir>/<experimentId>/` directory with the other user however you like (email, a shared
+drive, a git branch), then run:
+
+```
+npm run report:compare -- --a-dir experiment-results --a-experiment <your-experiment-id> \
+                          --b-dir <path-to-their-copy> --b-experiment <their-experiment-id> \
+                          --out comparison.md
+```
+
+Both `--a-experiment`/`--b-experiment` are optional and default to the most recently written
+experiment under the given directory. This is a **peer comparison**, not a check against ground
+truth: it reports matched entries, entries that differ (with the exact field-level detail), and
+entries present on only one side — with no pass/fail verdict, unlike `reproduce:smoke`'s comparison
+against the fixed Phase 12 reference. `--out` writes a self-contained Markdown summary you can drop
+into `docs/` and publish (see below); omit it to just print a summary to the console.
+
+## Publishing to GitHub Pages
+
+`docs/` (this guide, `BENCHMARK.md`, `sample-dashboard.html`, and `index.html`) can be published as
+a static GitHub Pages site via `.github/workflows/pages.yml`. This is a one-time, manual opt-in per
+repository, not something that happens automatically:
+
+1. In the repository's **Settings → Pages**, set **Source** to **GitHub Actions**.
+2. From the **Actions** tab, select **Publish docs to GitHub Pages** and run it manually
+   (`workflow_dispatch`) — it stays manual-trigger-only by default so an unconfigured repository
+   never gets a loud, repeated failed run on every push. If you want it to redeploy automatically
+   whenever `docs/` changes, add a `push` trigger scoped to `paths: ['docs/**']` once step 1 above
+   is done.
+
+Nothing published this way is a real benchmark finding — it is exactly the same labeled-synthetic
+demo and documentation already in this repository (plus, optionally, a Markdown comparison summary
+you generate yourself and choose to copy into `docs/`).
+
 ## Required run metadata
 
 Every run records: task id and task version, repository SHA, agent name and version, model name
@@ -132,7 +171,9 @@ traceable.
    but with a deterministic fake agent that never attempts to solve a task. Combined with the
    explicitly-labeled synthetic demo at `docs/sample-dashboard.html`, every result artifact
    currently in this repository is a test fixture, a mechanism-verification run, or a labeled
-   demo — none is a real benchmark finding.
+   demo — none is a real benchmark finding. `.github/workflows/ci.yml` now runs this smoke
+   reproduction on every push/PR, so it is continuously re-verified on independent machines — this
+   strengthens confidence in the pipeline's mechanics, not in any performance claim.
 3. **`Run.metadata.modelName`/`modelVersion` are not yet populated** for LLM-backed runs — this is
    a known, currently open gap (tracked in this project's internal risk register), not something
    this guide's publication has resolved. As a partial stopgap, the agent name recorded on a run
@@ -140,3 +181,10 @@ traceable.
    still distinguishable by backend even though the dedicated metadata fields are empty.
 4. **Reproducing a real run requires your own LLM provider credentials and incurs real API cost**
    (see the privacy/cost note above) unless you use a local model.
+5. **`npm run report:compare` (see "Cross-user comparison" above) has not yet been exercised
+   between two genuinely independent real users** — only against fixtures/synthetic data in this
+   project's own test suite so far.
+6. **The GitHub Pages workflow (`pages.yml`) is untested against a real deployment** — it has been
+   reviewed for structural correctness but not yet run, since that requires the repository owner to
+   first enable Pages in Settings (see "Publishing to GitHub Pages" above), a deliberately manual,
+   unautomated step.

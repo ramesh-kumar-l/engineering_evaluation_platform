@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-reproduce:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['20.x', '22.x']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      # Runs directly against the already-built dist/, not via `npm run reproduce:smoke`, to avoid
+      # a second non-incremental tsc build. This is a genuine "automated run wired into CI": a free,
+      # zero-credential, deterministic execution of the real harness/verifier/metrics/reporting/
+      # dashboard pipeline (never a live LLM), checked against the reference committed in Phase 12
+      # (docs/reproduction-reference/smoke-reference.json). Every CI run is a fresh, independent
+      # machine re-proving the pipeline reproduces identically — see ADR-017/ADR-018.
+      - name: Smoke reproduction
+        run: node dist/experiments/runSmokeReproduction.js
+
+      - name: Upload smoke reproduction output on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-reproduction-output-node${{ matrix.node-version }}
+          path: |
+            experiment-results-smoke/
+            reports-smoke/
+          retention-days: 7

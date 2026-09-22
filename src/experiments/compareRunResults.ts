@@ -24,34 +24,40 @@ function keyOf(entry: Pick<ReferenceEntry, 'taskId' | 'conditionName'>): string 
   return `${entry.taskId}::${entry.conditionName}`;
 }
 
-type UnratedMismatch = Omit<RunComparisonMismatch, 'informational'>;
+export interface FieldDifference {
+  readonly field: string;
+  readonly expected: unknown;
+  readonly actual: unknown;
+}
 
-function diffEntry(reference: ReferenceEntry, actual: ReferenceEntry): UnratedMismatch[] {
-  const mismatches: UnratedMismatch[] = [];
-  const base = { key: keyOf(reference), taskId: reference.taskId, conditionName: reference.conditionName };
+/**
+ * Pure, symmetric per-field comparison of two entries (outcomeStatus + every metric key present on
+ * either side) — no reference/actual asymmetry, no verdict. Shared by `compareReferenceEntries`
+ * below (which layers its own reference-vs-actual/ECC-informational verdict on top) and
+ * `independentRunDiff.ts`'s peer-comparison `diffEntrySets` (which does not).
+ */
+export function diffEntryFields(a: ReferenceEntry, b: ReferenceEntry): FieldDifference[] {
+  const differences: FieldDifference[] = [];
 
-  if (reference.outcomeStatus !== actual.outcomeStatus) {
-    mismatches.push({
-      ...base,
-      field: 'outcomeStatus',
-      expected: reference.outcomeStatus,
-      actual: actual.outcomeStatus,
-    });
+  if (a.outcomeStatus !== b.outcomeStatus) {
+    differences.push({ field: 'outcomeStatus', expected: a.outcomeStatus, actual: b.outcomeStatus });
   }
 
-  const metricNames = new Set([...Object.keys(reference.metrics), ...Object.keys(actual.metrics)]);
+  const metricNames = new Set([...Object.keys(a.metrics), ...Object.keys(b.metrics)]);
   for (const name of metricNames) {
-    if (reference.metrics[name] !== actual.metrics[name]) {
-      mismatches.push({
-        ...base,
-        field: `metric:${name}`,
-        expected: reference.metrics[name],
-        actual: actual.metrics[name],
-      });
+    if (a.metrics[name] !== b.metrics[name]) {
+      differences.push({ field: `metric:${name}`, expected: a.metrics[name], actual: b.metrics[name] });
     }
   }
 
-  return mismatches;
+  return differences;
+}
+
+type UnratedMismatch = Omit<RunComparisonMismatch, 'informational'>;
+
+function diffEntry(reference: ReferenceEntry, actual: ReferenceEntry): UnratedMismatch[] {
+  const base = { key: keyOf(reference), taskId: reference.taskId, conditionName: reference.conditionName };
+  return diffEntryFields(reference, actual).map((difference) => ({ ...base, ...difference }));
 }
 
 /**

@@ -1,12 +1,14 @@
 # 20 — Next Actions
 
 1. **Immediate:** await explicit user approval to proceed with executing a live comparison run
-   (item 2 below), Phase 13 (CI/GitHub Integration), the remaining Phase 9 roadmap scope (item 2c
+   (item 2 below), pushing anything to GitHub or enabling GitHub Pages (item 2g below), a dedicated
+   `format:check` repo-wide reformat (item 2g below), the remaining Phase 9 roadmap scope (item 2c
    below), or richer Phase 10 dashboard views (item 2d below). Phase 7's roadmap scope (including
    failure analysis, item 2a below), Phase 8's orchestration follow-up (item 2b below), Phase 9's
    canonical Report/persistence format (item 2c below), Phase 10's dashboard MVP (item 2d below),
-   Phase 11's benchmark documentation/reproducibility guide/regenerable demo (item 2e below), and
-   Phase 12's free smoke reproduction (item 2f below) are now all fully implemented.
+   Phase 11's benchmark documentation/reproducibility guide/regenerable demo (item 2e below), Phase
+   12's free smoke reproduction (item 2f below), and Phase 13's CI/GitHub Pages/cross-user
+   comparison mechanism (item 2g below) are now all fully implemented.
 2. **Phase 6 remainder — now implemented, live execution still open:**
    - `LlmSolvingAgent` (`src/harness/agents/llmSolvingAgent.ts`) is the real, LLM-backed solving
      agent, supporting Claude, ChatGPT, Gemini, or a local model via `src/harness/llm/` (ADR-013
@@ -101,6 +103,23 @@
    mechanics, not ECC's or any provider's quality); any mechanism for a second external user's
    independently-produced report to be uploaded/compared against a first user's (Phase 13's
    territory).
+2g. **Phase 13 — now implemented:** `.github/workflows/ci.yml` runs build/lint/test plus
+   `node dist/experiments/runSmokeReproduction.js` on every push/PR to `main` (Node 20.x/22.x
+   matrix) — a genuinely independent machine re-proving Phase 12's smoke reproduction on every CI
+   run, safe on fork PRs (no secrets, no network). `.github/workflows/pages.yml`
+   (`workflow_dispatch`-only, not automatic) can publish `docs/` as a GitHub Pages site once the
+   user enables Pages in repo Settings — a new `docs/index.html` landing page was added since the
+   site would otherwise 404 at its root. `src/experiments/independentRunDiff.ts`/
+   `compareIndependentRuns.ts` (`npm run report:compare`) give two users a purely offline CLI to
+   diff their independently-produced result sets, with an optional `--out` Markdown summary they
+   can publish via `pages.yml`. See ADR-018 in [[14-decisions]] and [[phases/phase-13]]. **Not yet
+   done, by design:** a `format:check` CI gate (the repo has ~105 files of pre-existing formatting
+   drift — `npx prettier --check .` fails today; needs its own explicit, disclosed reformat commit
+   first, not bundled into a CI-wiring phase); actually enabling GitHub Pages in repo Settings, or
+   pushing/triggering any of this round's workflows (the user's explicit, separately-confirmed
+   action — nothing was pushed this round); Dependabot/CodeQL/branch protection/multi-OS runners
+   (no concrete need demonstrated yet); a live-LLM CI job (would need secrets and real, recurring
+   cost — never automated).
 3. **Fixture backlog (not phase-blocking, pick up incrementally):** 27 of the 30 tasks still use
    the `"unpinned"` sentinel — only `debugging-01`, `feature-01`, `refactoring-01` have real
    fixture source code, a real `commitSha`, and real verification coverage. Author the rest the
@@ -198,6 +217,19 @@
    `time-to-correct-outcome` must stay excluded from any such reference/comparison; it is the one
    metric built from wall-clock timestamps and never reproduces exactly.
 
-Do not execute a live comparison run before approval is given (master prompt §40). Phase 13
-(CI/GitHub Integration), the remaining Phase 9 roadmap scope (item 2c above), and richer Phase 10
-dashboard views (item 2d above) also await explicit approval before implementation starts.
+14. **CI/Pages/cross-user-comparison convention note (ADR-018):** `ci.yml`'s smoke-reproduction step
+   must call `node dist/experiments/runSmokeReproduction.js` directly, never
+   `npm run reproduce:smoke` (that script's own `npm run build &&` prefix would trigger a second,
+   redundant, non-incremental `tsc` build). Never add a live-LLM job to any automated workflow — no
+   secrets, no recurring API cost, ever, from CI. `pages.yml` stays `workflow_dispatch`-only unless
+   the user has confirmed Pages is enabled in repo Settings; do not add an automatic `push` trigger
+   preemptively. A new cross-user comparison function must stay symmetric (`diffEntrySets()`'s
+   shape) — never route two peer users' results through `compareReferenceEntries()`'s
+   reference-vs-actual/`eccCliAvailable` semantics, which assume one side is authoritative. Shared
+   per-field comparison logic belongs in `compareRunResults.ts`'s exported `diffEntryFields()`, not
+   duplicated.
+
+Do not execute a live comparison run before approval is given (master prompt §40). Pushing to
+GitHub, enabling GitHub Pages in repo Settings, a dedicated `format:check` reformat pass, the
+remaining Phase 9 roadmap scope (item 2c above), and richer Phase 10 dashboard views (item 2d
+above) also await explicit approval before implementation starts.

@@ -5,7 +5,7 @@ source code, if picking this project back up after a break.
 
 ## Where things stand right now
 
-Phase 0 (Foundation) through Phase 12 (External Reproduction) are complete. Phase 6's full roadmap
+Phase 0 (Foundation) through Phase 13 (CI/GitHub Integration) are complete. Phase 6's full roadmap
 scope (real solving agent + actual comparison-run mechanism) is closed — see below. Phase 7 is
 complete against its *entire* roadmap row, including failure clustering — not just the
 confidence-intervals-and-effect-size scope from the round that first implemented it. Phase 8
@@ -17,10 +17,43 @@ plus a static, single-experiment MVP dashboard reading Phase 9's `ReportGraph` f
 (Public Benchmark) is implemented and verified, scoped to public-facing benchmark documentation, a
 reproducibility guide, and a regenerable synthetic public sample. Phase 12 (External Reproduction)
 is implemented and verified, scoped to a free, zero-credential "smoke reproduction" of the real
-pipeline, checked against a committed reference — a real published result from an actual live LLM
-still awaits an approved live comparison run (see below).
+pipeline, checked against a committed reference. Phase 13 (CI/GitHub Integration) is implemented
+and verified, scoped to CI wiring around that same smoke reproduction, a manual-opt-in GitHub
+Pages hosting mechanism, and an offline cross-user report comparison CLI — a real published result
+from an actual live LLM still awaits an approved live comparison run, and nothing has been pushed
+to GitHub or enabled in repo Settings yet (see below).
 
-**Phase 12 (this session):** `npm run reproduce:smoke` (`src/experiments/runSmokeReproduction.ts`)
+**Phase 13 (this session):** `.github/workflows/ci.yml` runs `npm run build`/`lint`/`test` plus
+`node dist/experiments/runSmokeReproduction.js` (called directly, not via its npm script, to avoid
+a redundant second `tsc` build) on every `push`/`pull_request` to `main`, Node 20.x/22.x matrix —
+the first time CI exists at all in this repo, and it runs a genuine pipeline execution, not just
+build/lint/test: every CI run independently re-proves the Phase 12 smoke reproduction still matches
+the checked-in reference. Confirmed safe on fork PRs (no secrets, no network,
+`{provider: 'fake-deterministic'}` explicit per ADR-017). `.github/workflows/pages.yml`
+(`workflow_dispatch`-only — deliberately not automatic, since Pages isn't enabled in repo Settings
+yet) can publish `docs/` as a static GitHub Pages site via the current two-job
+`configure-pages`/`upload-pages-artifact`/`deploy-pages` pattern; a new `docs/index.html` landing
+page was added since the site root would otherwise 404. New
+`src/experiments/independentRunDiff.ts`/`compareIndependentRuns.ts` (`npm run report:compare`) give
+two users a purely local, offline CLI to diff their independently-produced result sets — a new
+**symmetric** `diffEntrySets()` (matched/differing-with-field-detail/onlyInA/onlyInB, no verdict),
+deliberately not reusing `compareRunResults.ts`'s `compareReferenceEntries()` (whose
+reference-vs-actual/ECC-informational/pass-fail semantics assume one side is authoritative, which
+isn't true between two peers) — only the mechanical per-field comparison was extracted into a
+newly-shared `diffEntryFields()`. An optional `--out <path>` writes a Markdown summary a user can
+choose to publish via `pages.yml`, connecting the comparison and hosting halves of this phase's
+exit criterion. A Plan-subagent review, run before any code was written, caught that
+`npx prettier --check .` already reports ~105 files of formatting drift — so a `format:check` CI
+gate was deliberately left out this round (needs its own explicit, disclosed reformat commit
+first) — plus several GitHub Actions correctness details (missing `permissions`/`concurrency`,
+the redundant double build, the current non-deprecated Pages deploy pattern), all incorporated.
+Verified for real, locally: ran `node dist/experiments/runSmokeReproduction.js` exactly as CI
+invokes it (27/27 matched, passed) and `report:compare` against a fresh run compared with itself
+(27 matched, 0 differing, Markdown `--out` file inspected) — the workflow YAML itself remains
+unverified against a real GitHub Actions execution since nothing was pushed this round. Full detail
+in [[phases/phase-13]] and ADR-018 in [[14-decisions]].
+
+**Phase 12:** `npm run reproduce:smoke` (`src/experiments/runSmokeReproduction.ts`)
 runs the *real* harness → agent → verifier → metrics → Phase 7/8 analysis → Phase 9 report → Phase
 10 dashboard pipeline end-to-end, for free, using a new `DeterministicFakeLlmClient`
 (`src/harness/llm/deterministicFakeLlmClient.ts`) instead of a paid LLM backend — a pure, stateless
@@ -183,9 +216,10 @@ deliberately unimplemented (ADR-009). Full detail in [[phases/phase-05]].
 reproduce identically across machines for free — none of this is a real finding, since the smoke
 path's agent never attempts to solve a task. That still requires an approved live comparison run
 against a real, paid LLM (see below) followed by the existing `report:generate`/
-`dashboard:generate` pipeline. No GitHub Pages/CI publishing automation exists (Phase 13's
-territory), and no mechanism exists yet for one external user's independently-produced report to
-be compared against another's (also Phase 13's territory).
+`dashboard:generate` pipeline. GitHub Pages publishing (`.github/workflows/pages.yml`) and a
+cross-user comparison CLI (`npm run report:compare`) now exist (Phase 13), but Pages has not been
+enabled in repo Settings and nothing has been pushed to GitHub yet — both are the user's own,
+separately-confirmed next action, not something this implementation does automatically.
 
 **Richer dashboard views don't exist yet.** `src/dashboard/` (Phase 10) renders only a single
 experiment's `ReportGraph` — [[12-dashboard-strategy]]'s full target view list (multi-experiment/
@@ -224,15 +258,17 @@ assume any of these exist without checking `implementation-status.md` first.
 
 ## Immediate next step
 
-Per the master prompt's strict phase gate, this Phase 12 work's completion is reported to the user
-and no further Phase 13 work or live run has started. Do not begin further work, and do not
-execute a live comparison run, without an explicit new approval message from the user, even if
-this file is being read in a fresh session — see [[20-next-actions]] and [[00-project-charter]]
-§Working protocol. Phases 6, 7, 8, 9, 10, 11, and 12 are now all fully complete against this
-round's scope; the next open items are: executing a live comparison run (needs the user's own LLM
-credentials and an explicit go-ahead), Phase 13 (CI/GitHub Integration), the remaining Phase 9
-roadmap scope (CSV/Markdown/HTML export), or richer Phase 10 dashboard views (multi-experiment
-comparison, failure analysis — needs Phase 7/8 output folded into `Report` first).
+Per the master prompt's strict phase gate, this Phase 13 work's completion is reported to the user
+and nothing has been pushed to GitHub, no GitHub Pages Settings change was made, and no live run
+has started. Do not begin further work — and do not push, enable Pages, execute a live comparison
+run, or run a repo-wide `format:check` reformat — without an explicit new approval message from
+the user, even if this file is being read in a fresh session — see [[20-next-actions]] and
+[[00-project-charter]] §Working protocol. Phases 6 through 13 are now all fully complete against
+this round's scope; the next open items are: executing a live comparison run (needs the user's own
+LLM credentials and an explicit go-ahead), pushing this work and enabling GitHub Pages, a dedicated
+`format:check` reformat pass, the remaining Phase 9 roadmap scope (CSV/Markdown/HTML export), or
+richer Phase 10 dashboard views (multi-experiment comparison, failure analysis — needs Phase 7/8
+output folded into `Report` first).
 
 ## Process reminders for whoever (human or agent) picks this up
 
@@ -322,3 +358,12 @@ comparison, failure analysis — needs Phase 7/8 output folded into `Report` fir
   fixture's tests, the metric/verifier set) legitimately changes the smoke path's expected output
   — never regenerated automatically from a user's own run. `time-to-correct-outcome` must stay
   excluded from any such comparison; it is wall-clock-derived and never reproduces exactly.
+- CI/Pages/cross-user-comparison convention (ADR-018): `ci.yml`'s smoke step must call
+  `node dist/experiments/runSmokeReproduction.js` directly, never the `npm run reproduce:smoke`
+  script (its `npm run build &&` prefix would trigger a redundant second, non-incremental `tsc`
+  build). Never add a live-LLM job to any automated workflow. `pages.yml` stays
+  `workflow_dispatch`-only unless the user has confirmed Pages is enabled in Settings — don't add
+  an automatic `push` trigger preemptively. A new cross-user comparison function must stay
+  symmetric (`diffEntrySets()`'s shape); never route two peer users' results through
+  `compareReferenceEntries()`'s reference-vs-actual semantics. Shared per-field comparison logic
+  belongs in `compareRunResults.ts`'s exported `diffEntryFields()`.

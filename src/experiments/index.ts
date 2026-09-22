@@ -1,4 +1,5 @@
 export * from './analyzeComparisonResults.js';
+export * from './compareIndependentRuns.js';
 export * from './compareRunResults.js';
 export * from './demoRunRecords.js';
 export * from './eccAvailabilityCheck.js';
@@ -6,6 +7,7 @@ export * from './experimentConditions.js';
 export * from './generateDashboard.js';
 export * from './generateDemoDashboard.js';
 export * from './generateReport.js';
+export * from './independentRunDiff.js';
 export * from './llmProviderConfigFromEnv.js';
 export * from './reproductionReference.js';
 export * from './resultsWriter.js';

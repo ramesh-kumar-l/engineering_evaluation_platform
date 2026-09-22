@@ -1,0 +1,44 @@
+name: Publish docs to GitHub Pages
+
+# Manual trigger only. GitHub Pages must be enabled once in this repository's Settings > Pages
+# (source: "GitHub Actions") before this workflow can succeed — it is not run automatically on
+# push, so an un-configured repository never gets a loud, repeated failure. See
+# docs/REPRODUCING.md's "Publishing to GitHub Pages" section for the one-time setup and how to add
+# an automatic push trigger afterward, if wanted.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload docs/ as the Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

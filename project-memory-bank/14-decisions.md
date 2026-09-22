@@ -878,3 +878,81 @@ Format: Decision / Context / Options / Chosen approach / Reason / Trade-offs / C
   0. No existing schema, harness, verifier, or metrics logic changed; `runComparisonExperiment.ts`'s
   only change is the additive `llmProviderConfig` option.
 - **Status:** Accepted.
+
+## ADR-018: CI runs `reproduce:smoke` as its real "automated run"; GitHub Pages hosting is a manual-opt-in, GitHub-operated static publish; cross-user comparison is a new symmetric, offline diff — never asymmetric `compareReferenceEntries`
+
+- **Context:** Phase 13's exit criterion: "automated runs wired into CI, cross-user report
+  comparison/hosting." Two constraints from every prior phase still apply: no live comparison run
+  against a real, paid LLM has ever been executed (still gated on a separate future approval), and
+  [[04-architecture]]'s local-first mandate rules out any new database/queue/service/cloud infra
+  until a real need demonstrates it.
+- **"Automated runs wired into CI":** `.github/workflows/ci.yml` runs `npm run build`/`lint`/`test`
+  on `push`/`pull_request` to `main` (Node 20.x and 22.x matrix), then runs
+  `node dist/experiments/runSmokeReproduction.js` directly (not via `npm run reproduce:smoke`,
+  which would trigger a second, non-incremental `tsc` build — `tsconfig.json` has no
+  `incremental`/`tsBuildInfoFile` configured). This is a genuine "run," not just build/lint/test:
+  Phase 12's free, zero-credential, deterministic pipeline execution, checked against the reference
+  committed at `docs/reproduction-reference/smoke-reference.json`. Every CI run is a fresh,
+  independent machine re-proving the real harness/verifier/metrics/analysis/report/dashboard
+  pipeline reproduces identically — strengthening confidence in mechanics, not adding a performance
+  claim. Confirmed safe on `pull_request` (not `pull_request_target`, which would be actively wrong
+  here) for fork-authored PRs: the smoke path never touches `process.env`/`EEP_LLM_*` (explicit
+  `{provider: 'fake-deterministic'}` per ADR-017), makes no network calls, and needs no secrets.
+  `permissions: contents: read` and a `concurrency` group are set at the workflow level as
+  least-privilege/anti-pile-up hardening. A live-LLM CI job was explicitly rejected — it would need
+  stored secrets and incur real, recurring API cost on every push, which must never happen
+  automatically.
+- **Explicitly deferred — `format:check`:** a Plan-subagent review, run before any code was
+  written, caught that `npx prettier --check .` currently reports formatting drift across ~105
+  files (`format` has always been write-only; nothing has enforced it). Adding a `format:check` CI
+  gate this round would fail on day one over a purely cosmetic, whole-repo diff the user should
+  approve deliberately as its own explicit step, not have bundled silently into a CI-wiring phase.
+  Left out of `ci.yml`; tracked as an open item in [[20-next-actions]] and [[17-known-limitations]].
+- **"Hosting":** `.github/workflows/pages.yml` publishes `docs/` (a new `docs/index.html` landing
+  page, `sample-dashboard.html`, `BENCHMARK.md`, `REPRODUCING.md`) via the current, non-deprecated
+  two-job GitHub Pages pattern (`actions/configure-pages`/`upload-pages-artifact` in a `build` job,
+  `actions/deploy-pages` in a `deploy` job needing it, `permissions: pages: write, id-token: write`,
+  a `github-pages` environment) — not the legacy branch-based approach. This is judged compliant
+  with [[04-architecture]]'s local-first/no-cloud-infra constraint because GitHub, not EEP, operates
+  the hosting, and it only ever serves already-generated static files, the same "the HTML file is
+  the publishable artifact, copy it anywhere" precedent ADR-015/016 already established. Trigger is
+  `workflow_dispatch` only, deliberately not automatic on push — GitHub Pages must first be enabled
+  once in repository Settings (source: "GitHub Actions"), and an auto-triggered deploy against an
+  unconfigured repository would fail loudly on every push until then. `docs/REPRODUCING.md`
+  documents the one-time manual opt-in and how to add a `push`-on-`docs/**` trigger afterward.
+  Neither enabling Pages in Settings nor pushing/triggering any workflow was done as part of this
+  implementation — that is the user's explicit action, per the Git Safety Protocol (no push without
+  an explicit ask, and enabling a public-facing setting is exactly the kind of externally-visible
+  action that needs confirmation, not silent execution).
+- **"Cross-user report comparison":** new `src/experiments/independentRunDiff.ts`
+  (`diffEntrySets()`) and `compareIndependentRuns.ts` (`npm run report:compare` CLI), entirely
+  local/offline — two users exchange their `<resultsDir>/<experimentId>/` directory out-of-band
+  (email, a shared drive, a git branch); there is no upload or server. Deliberately a **new**
+  function, not a reuse of `compareRunResults.ts`'s `compareReferenceEntries()`: that function's
+  entire contract is asymmetric (`reference` vs. `actual`, an `eccCliAvailable`-gated
+  informational/hard split, a `passed` verdict) and meaningless between two peer users, neither of
+  whom is authoritative. `diffEntrySets()` is a symmetric diff (matched / differs-with-per-field-
+  detail / onlyInA / onlyInB, no verdict, no exit-code-1 semantics). The one piece of real shared
+  logic — comparing `outcomeStatus` and every metric key between two `ReferenceEntry` values — was
+  extracted from `compareRunResults.ts`'s previously-private `diffEntry()` into a newly-exported,
+  purely-mechanical `diffEntryFields()`, reused by both `compareReferenceEntries()` (refactored to
+  call it, behavior-preserving, all pre-existing tests pass unmodified) and `diffEntrySets()`. An
+  optional `formatDiffMarkdown()`/`--out <path>` lets a user write a self-contained Markdown summary
+  and, if they choose, drop it into `docs/` for `pages.yml` to publish — connecting the comparison
+  and hosting halves of this phase's exit criterion instead of leaving them disjoint (a gap a
+  Plan-subagent review flagged before implementation).
+- **Also explicitly deferred:** Dependabot, CodeQL/security scanning, branch protection rules, and
+  Windows/macOS CI runners — no concrete need demonstrated yet (ADR-004/ADR-009 discipline); any
+  general Report-to-CSV/Markdown/HTML export pipeline (unchanged Phase 9 roadmap backlog item; the
+  new Markdown formatter here is narrowly for the comparison-diff summary only, not a general
+  exporter).
+- **Consequences:** New `.github/workflows/ci.yml`, `.github/workflows/pages.yml`, `docs/index.html`;
+  new `src/experiments/independentRunDiff.ts`, `compareIndependentRuns.ts`, plus 2 new test files;
+  `compareRunResults.ts` edited to export `diffEntryFields`/`FieldDifference` (behavior-preserving);
+  new `npm run report:compare` script; `docs/REPRODUCING.md`/`README.md` updated with CI/Pages/
+  cross-user-comparison documentation. No existing schema, harness, verifier, metrics, reporting, or
+  dashboard logic changed. Workflow YAML was reviewed for structural correctness and current
+  (non-deprecated) action versions but, since no local GitHub Actions runner is available, is
+  unverified against a real GitHub-hosted execution until pushed — flagged explicitly, not silently
+  assumed working.
+- **Status:** Accepted.

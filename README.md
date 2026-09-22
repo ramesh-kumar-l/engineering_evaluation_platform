@@ -1,5 +1,7 @@
 # Engineering Evaluation Platform (EEP)
 
+[![CI](https://github.com/ramesh-kumar-l/Engineering-Evaluation-Platform-EEP-/actions/workflows/ci.yml/badge.svg)](https://github.com/ramesh-kumar-l/Engineering-Evaluation-Platform-EEP-/actions/workflows/ci.yml)
+
 **Reproducible evaluation infrastructure for AI-assisted software engineering.**
 
 EEP exists to answer one question with evidence rather than anecdote:
@@ -13,27 +15,40 @@ engineering tasks, capturing full traces and producing reproducible, falsifiable
 
 ## Status
 
-Phase 12 of 13 complete — see
+Phase 13 of 13 complete — see
 [`project-memory-bank/19-phase-status.md`](project-memory-bank/19-phase-status.md) for the
 per-phase ledger and [`project-memory-bank/13-roadmap.md`](project-memory-bank/13-roadmap.md) for
-the full roadmap. **327 tests passing across 85 files** (verified 2026-09-22: `npm test`).
+the full roadmap. **335 tests passing across 87 files** (verified 2026-09-22: `npm test`).
 
 Built and working: the evaluation contract and 14-entity domain model, a 30-task benchmark (3
 with real fixture code and pinned commits), an isolated experiment harness, deterministic
 verification, a 14-of-22-metric scoring engine, a hand-rolled statistics module (confidence
 intervals, effect sizes, failure clustering), a real ECC `ContextProvider` integration
 (subprocess CLI invocation, plus per-component ablation), canonical `Report`/`ReportGraph`
-persistence, a static HTML dashboard MVP, public-facing benchmark/reproducibility documentation,
-and a free, zero-credential "smoke reproduction" that runs the real pipeline end-to-end and
-verifies it against a checked-in reference.
+persistence, a static HTML dashboard MVP, public-facing benchmark/reproducibility documentation, a
+free, zero-credential "smoke reproduction" that runs the real pipeline end-to-end and verifies it
+against a checked-in reference, a GitHub Actions CI workflow that runs that same smoke
+reproduction on every push/PR, an offline cross-user report comparison CLI
+(`npm run report:compare`), and a GitHub Pages workflow that can publish `docs/` as a static site
+(manual opt-in — see [Continuous Integration](#continuous-integration) below).
 
 Not yet done: executing a live comparison run against a real, paid LLM backend (the mechanism is
 built and verified end-to-end — including against genuinely-executed, not just synthetic, data via
 `npm run reproduce:smoke` — but running it with a real LLM actually attempting each task needs the
-user's own API key or local model and an explicit `npm run experiment:run`), and Phase 13 (CI/
-GitHub integration). See
+user's own API key or local model and an explicit `npm run experiment:run`). See
 [`project-memory-bank/20-next-actions.md`](project-memory-bank/20-next-actions.md) for the full
 backlog.
+
+## Continuous Integration
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push/PR to `main` (Node 20.x
+and 22.x): build, lint, the full test suite, and — genuinely, not just build/lint/test —
+`npm run reproduce:smoke`, so every CI run is an independent machine re-proving the real pipeline
+reproduces identically against the checked-in reference. It needs no secrets and makes no network
+calls, so it runs safely on pull requests from forks. [`.github/workflows/pages.yml`](.github/workflows/pages.yml)
+can publish `docs/` (including the sample dashboard) to GitHub Pages — this is a manual,
+one-time-opt-in workflow, not run automatically; see
+[`docs/REPRODUCING.md`](docs/REPRODUCING.md#publishing-to-github-pages).
 
 ## Benchmark and reproduction
 
